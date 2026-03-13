@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title || "Admin Dashboard" %></title>
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    .admin-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap:16px;
+      margin-top:16px;
+    }
+    .admin-card{
+      border:1px solid #e5eaf2;
+      border-radius:14px;
+      padding:18px;
+      text-decoration:none;
+      color:#0f172a;
+      font-weight:800;
+      background:#fff;
+      transition:all .15s ease;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:15px;
+    }
+    .admin-card:hover{
+      background:#f8fafc;
+      transform:translateY(-2px);
+      box-shadow:0 8px 20px rgba(0,0,0,.06);
+    }
+  </style>
+</head>
+
+<body>
+<div class="site">
+
+  <header class="app-header">
+    <div class="app-title">Admin Dashboard</div>
+    <div class="app-actions">
+      <a class="btn logout-btn" href="/pos">POS</a>
+      <a class="btn logout-btn" href="/logout">Log out</a>
+    </div>
+  </header>
+
+ <div class="card" style="margin-top:18px;">
+
+  <h2 style="margin-bottom:5px;">Admin Dashboard</h2>
+  <div class="muted">Manage your system settings and reports.</div>
+
+  <div class="admin-grid">
+
+   <a href="/pos" style="background:#2563eb;color:white;">
+  💳 POS
+</a>
+
+    <a href="/admin/items">
+      ⚙️ Items & Prices
+    </a>
+
+    <a href="/admin/users">
+      👤 Manage Users
+    </a>
+
+    <a href="/admin/logs">
+      📜 Audit Logs
+    </a>
+
+    <a href="/refund">
+      🔁 Void / Refund
+    </a>
+
+    <a href="/reports/voided">
+      🚫 Voided Report
+    </a>
+
+  </div>
+<%- include('partials/footer') %>
+</div>
+</html>

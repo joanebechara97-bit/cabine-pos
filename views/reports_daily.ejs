@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Daily Report</title>
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    body { font-size: 13px; }
+
+    /* "Human" buttons that match POS feel */
+    .btn-human{
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #e5eaf2;
+      background: #fff;
+      color: #0f172a;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-human:hover{ background:#f8fafc; }
+    .btn-primary{
+      background:#0f172a;
+      color:#fff;
+      border-color:#0f172a;
+    }
+    .btn-primary:hover{ opacity:.92; }
+
+    .filter-row{
+      margin-bottom: 12px;
+      display:flex;
+      gap:10px;
+      align-items:end;
+      flex-wrap:wrap;
+    }
+    .filter-row label{ font-weight: 800; display:block; margin-bottom:4px; }
+    select, input[type="date"]{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #e5eaf2;
+      font-weight:700;
+    }
+
+    table th, table td { padding: 8px; }
+
+    @media print {
+      body { font-size: 11px; }
+      .no-print { display:none !important; }
+      .card { box-shadow:none !important; border:none !important; }
+      .site { padding: 0 !important; }
+      .app-header { margin-bottom: 10px; }
+      table th, table td { padding: 6px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="site">
+
+    <header class="app-header">
+      <div class="brand"><img src="/assets/logo-ss-png.png" alt="logo" /></div>
+      <div class="app-title no-print">San Stephano Daily Access — Daily Report</div>
+
+      <div class="app-actions no-print">
+        <a class="btn-human" href="/pos">← Back to POS</a>
+        <% if (!user || user.role === 'ADMIN' || (user.perms && user.perms.canPrintReports)) { %>
+          <button class="btn-human btn-primary" type="button" onclick="window.print()">🖨️ Print Report</button>
+        <% } %>
+        <img src="/assets/job-logo-png.png" class="side-logo" alt="Job Logo" />
+      </div>
+    </header>
+
+    <div class="card">
+
+      <!-- TOP ACTIONS ROW -->
+      <div class="no-print" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+        <a class="btn-human btn-primary"
+           href="/reports/daily/export.xlsx<%= dateISO ? ('?date=' + encodeURIComponent(dateISO)) : '' %>">
+          ⬇️ Export Excel
+        </a>
+
+        <a class="btn-human"
+           href="/reports/daily">
+          Reset
+        </a>
+      </div>
+
+      <!-- FILTER OPTIONS -->
+      <form class="filter-row no-print" method="get" action="/reports/daily">
+        <div>
+          <label>Filter</label>
+          <select id="dailyPreset" name="preset">
+            <option value="">Select…</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="custom">Pick a date</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Date</label>
+          <input type="date" id="dailyDate" name="date" value="<%= (dateISO || '') %>" />
+        </div>
+
+        <div>
+          <button type="submit" class="btn-human btn-primary">Apply Filter ✅</button>
+        </div>
+      </form>
+
+      <div class="no-print" style="margin-bottom:12px;color:#374151">
+        Date: <%= (dateLabel || new Date().toLocaleDateString()) %>
+      </div>
+
+      <h3>Summary by Category</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th style="text-align:right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (grouped || []).forEach(function(g){ %>
+            <tr>
+              <td><%= (g.category || '').replaceAll('_',' ') %></td>
+              <td><%= g.qty %></td>
+              <td style="text-align:right">$<%= (g.total||0).toFixed(2) %></td>
+            </tr>
+          <% }) %>
+          <% if(!grouped || grouped.length === 0){ %>
+            <tr><td colspan="3">No sales for this day.</td></tr>
+          <% } %>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" style="text-align:right;font-weight:900">Total Sales</td>
+            <td style="text-align:right;font-weight:900">$<%= (total||0).toFixed(2) %></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <h3 style="margin-top:16px">Invoice Lines</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Category</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:right">Price</th>
+            <th style="text-align:right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (rows || []).forEach(function(r){ %>
+            <tr>
+              <td><%= r.invoiceNumber != null ? r.invoiceNumber : '-' %></td>
+              <td><%= (r.category || '').replaceAll('_',' ') %></td>
+              <td style="text-align:center"><%= r.qty || 0 %></td>
+              <td style="text-align:right">$<%= (r.price || 0).toFixed(2) %></td>
+              <td style="text-align:right">$<%= (r.total || 0).toFixed(2) %></td>
+            </tr>
+          <% }) %>
+          <% if(!rows || rows.length === 0){ %>
+            <tr><td colspan="5">No invoice lines.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <script>
+    function toISODate(d){
+      const x = new Date(d);
+      const yyyy = x.getFullYear();
+      const mm = String(x.getMonth()+1).padStart(2,'0');
+      const dd = String(x.getDate()).padStart(2,'0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    const preset = document.getElementById('dailyPreset');
+    const dateInput = document.getElementById('dailyDate');
+
+    function applyPreset(val){
+      const now = new Date();
+      if(val === 'today'){
+        dateInput.value = toISODate(now);
+      } else if(val === 'yesterday'){
+        const y = new Date(now);
+        y.setDate(y.getDate() - 1);
+        dateInput.value = toISODate(y);
+      }
+    }
+
+    preset.addEventListener('change', (e)=> applyPreset(e.target.value));
+
+    if(dateInput.value){
+      preset.value = 'custom';
+    } else {
+      preset.value = 'today';
+      applyPreset('today');
+    }
+  </script>
+  <%- include('partials/footer') %>
+</body>
+</html>

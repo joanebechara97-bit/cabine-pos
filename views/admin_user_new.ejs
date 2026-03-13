@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title || "Create User" %></title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="site">
+  <header class="app-header">
+    <div class="app-title">Create User</div>
+    <div class="app-actions">
+      <a class="btn logout-btn" href="/admin/users">Back</a>
+      <a class="btn logout-btn" href="/admin">Admin</a>
+    </div>
+  </header>
+
+  <div class="card" style="margin:16px;">
+    <% if (error) { %>
+      <p style="color:#b91c1c; font-weight:800;"><%= error %></p>
+    <% } %>
+
+    <form method="POST" action="/admin/users">
+      <div style="display:grid; gap:10px; max-width:520px;">
+
+        <label>
+          <div style="font-weight:800; margin-bottom:6px;">Username</div>
+          <input name="username" value="<%= (form && form.username) || '' %>" required />
+        </label>
+
+        <label>
+          <div style="font-weight:800; margin-bottom:6px;">Password</div>
+          <input type="password" name="password" required />
+        </label>
+
+        <label>
+          <div style="font-weight:800; margin-bottom:6px;">Role</div>
+          <select name="role" id="roleSelect">
+            <option value="FRONT_DESK" <%= (form && form.role) === 'FRONT_DESK' ? 'selected' : '' %>>FRONT_DESK</option>
+            <option value="ADMIN" <%= (form && form.role) === 'ADMIN' ? 'selected' : '' %>>ADMIN</option>
+          </select>
+        </label>
+
+        <label style="display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" name="isActive" <%= (!form || form.isActive) ? 'checked' : '' %> />
+          <span style="font-weight:800;">Active</span>
+        </label>
+
+        <% const p = (form && form.perms) || {}; %>
+
+        <div id="permsBox" style="border:1px solid #e5eaf2; border-radius:12px; padding:12px;">
+          <div style="font-weight:900; margin-bottom:10px;">Permissions (FRONT_DESK)</div>
+
+          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+            <input type="checkbox" name="canAccessPOS" <%= p.canAccessPOS ? 'checked' : '' %> />
+            <span>Can access POS</span>
+          </label>
+
+          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+            <input type="checkbox" name="canConfirmOrder" <%= p.canConfirmOrder ? 'checked' : '' %> />
+            <span>Can confirm order</span>
+          </label>
+
+          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+            <input type="checkbox" name="canNewCustomer" <%= p.canNewCustomer ? 'checked' : '' %> />
+            <span>Can create new customer</span>
+          </label>
+
+          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+            <input type="checkbox" name="canViewDailyReport" <%= p.canViewDailyReport ? 'checked' : '' %> />
+            <span>Can view daily report</span>
+          </label>
+
+          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+            <input type="checkbox" name="canViewMonthlyReport" <%= p.canViewMonthlyReport ? 'checked' : '' %> />
+            <span>Can view monthly report</span>
+          </label>
+
+          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+            <input type="checkbox" name="canPrintReports" <%= p.canPrintReports ? 'checked' : '' %> />
+            <span>Can print reports</span>
+          </label>
+
+          <label style="display:flex; gap:10px; align-items:center;">
+            <input type="checkbox" name="canRefundInvoice" <%= p.canRefundInvoice ? 'checked' : '' %> />
+            <span>Can Void / Refund Invoice</span>
+          </label>
+        </div>
+
+        <button class="btn logout-btn" type="submit" style="justify-self:start;">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const roleSelect = document.getElementById('roleSelect');
+  const permsBox = document.getElementById('permsBox');
+
+  function togglePerms(){
+    permsBox.style.display = (roleSelect.value === 'FRONT_DESK') ? 'block' : 'none';
+  }
+
+  roleSelect.addEventListener('change', togglePerms);
+  togglePerms();
+</script>
+<%- include('partials/footer') %>
+</body>
+</html>

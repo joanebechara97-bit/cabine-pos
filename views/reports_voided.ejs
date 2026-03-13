@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title><%= title || "Voided Invoices" %></title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    body { font-size: 13px; }
+    .btn-human{
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #e5eaf2;
+      background: #fff;
+      color: #0f172a;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-human:hover{ background:#f8fafc; }
+    .btn-primary{ background:#0f172a; color:#fff; border-color:#0f172a; }
+    .btn-primary:hover{ opacity:.92; }
+    .filter-row{
+      margin-bottom: 12px;
+      display:flex;
+      gap:10px;
+      align-items:end;
+      flex-wrap:wrap;
+    }
+    .filter-row label{ font-weight:800; display:block; margin-bottom:4px; }
+    input[type="date"]{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #e5eaf2;
+      font-weight:700;
+    }
+    table th, table td { padding: 8px; }
+
+    @media print {
+      body { font-size: 11px; }
+      .no-print { display:none !important; }
+      .card { box-shadow:none !important; border:none !important; }
+      .site { padding: 0 !important; }
+      .app-header { margin-bottom: 10px; }
+      table th, table td { padding: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="site">
+    <header class="app-header">
+      <div class="brand"><img src="/assets/logo-ss-png.png" alt="logo" /></div>
+      <div class="app-title no-print">San Stephano Daily Access — Voided Invoices</div>
+
+      <div class="app-actions no-print">
+        <a class="btn-human" href="/pos">← Back to POS</a>
+        <% if (!user || user.role === 'ADMIN' || (user.perms && user.perms.canPrintReports)) { %>
+          <button class="btn-human btn-primary" type="button" onclick="window.print()">🖨️ Print</button>
+        <% } %>
+        <img src="/assets/job-logo-png.png" class="side-logo" alt="Job Logo" />
+      </div>
+    </header>
+
+    <div class="card" style="margin-top:14px;">
+
+      <% if (message) { %>
+        <p style="color:#b91c1c; font-weight:800;"><%= message %></p>
+      <% } %>
+
+      <div class="no-print" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+        <a class="btn-human btn-primary"
+           href="/reports/voided/export.xlsx<%= (from || to) ? ('?from=' + encodeURIComponent(from || '') + '&to=' + encodeURIComponent(to || '')) : '' %>">
+          ⬇️ Export Excel
+        </a>
+      </div>
+
+      <form class="filter-row no-print" method="get" action="/reports/voided">
+        <div>
+          <label>From</label>
+          <input type="date" name="from" value="<%= from || '' %>" />
+        </div>
+        <div>
+          <label>To</label>
+          <input type="date" name="to" value="<%= to || '' %>" />
+        </div>
+        <div>
+          <button type="submit" class="btn-human btn-primary">Apply Filter ✅</button>
+        </div>
+      </form>
+
+      <div style="margin:8px 0 14px 0;font-weight:900;">
+        Voided Invoices: <%= countInvoices || 0 %> — Total Amount: $<%= (total||0).toFixed(2) %>
+      </div>
+
+      <h3>Invoice Lines (VOIDED)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Voided At</th>
+            <th>Category</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:right">Price</th>
+            <th style="text-align:right">Total</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (rows || []).forEach(function(r){ %>
+            <tr>
+              <td><%= r.invoiceNumber != null ? r.invoiceNumber : '-' %></td>
+              <td><%= r.voidedAt ? new Date(r.voidedAt).toLocaleString() : '-' %></td>
+              <td><%= (r.category || '').replaceAll('_',' ') %></td>
+              <td style="text-align:center"><%= r.qty || 0 %></td>
+              <td style="text-align:right">$<%= (r.price || 0).toFixed(2) %></td>
+              <td style="text-align:right">$<%= (r.total || 0).toFixed(2) %></td>
+              <td style="white-space:pre-wrap;"><%= r.voidReason || '' %></td>
+            </tr>
+          <% }) %>
+          <% if(!rows || rows.length === 0){ %>
+            <tr><td colspan="7">No voided invoices in this range.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:16px">Summary by Category (VOIDED)</h3>
+      <table style="margin-top:8px">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th style="text-align:right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (grouped || []).forEach(function(g){ %>
+            <tr>
+              <td><%= (g.category || '').replaceAll('_',' ') %></td>
+              <td><%= g.qty %></td>
+              <td style="text-align:right">$<%= (g.total||0).toFixed(2) %></td>
+            </tr>
+          <% }) %>
+          <% if(!grouped || grouped.length === 0){ %>
+            <tr><td colspan="3">No data.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+  <%- include('partials/footer') %>
+</body>
+</html>

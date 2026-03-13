@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Monthly Report</title>
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    body { font-size: 13px; }
+
+    .btn-human{
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid #e5eaf2;
+      background: #fff;
+      color: #0f172a;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-human:hover{ background:#f8fafc; }
+    .btn-primary{
+      background:#0f172a;
+      color:#fff;
+      border-color:#0f172a;
+    }
+    .btn-primary:hover{ opacity:.92; }
+
+    .filter-row{
+      margin-bottom: 12px;
+      display:flex;
+      gap:10px;
+      align-items:end;
+      flex-wrap:wrap;
+    }
+    .filter-row label{ font-weight: 800; display:block; margin-bottom:4px; }
+
+    select, input[type="date"]{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid #e5eaf2;
+      font-weight:700;
+    }
+
+    table th, table td { padding: 8px; }
+
+    @media print {
+      body { font-size: 11px; }
+      .no-print { display:none !important; }
+      .card { box-shadow:none !important; border:none !important; }
+      .site { padding: 0 !important; }
+      .app-header { margin-bottom: 10px; }
+      table th, table td { padding: 6px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="site">
+    <header class="app-header">
+      <div class="brand"><img src="/assets/logo-ss-png.png" alt="logo" /></div>
+      <div class="app-title no-print">San Stephano Daily Access — Monthly Report</div>
+
+      <div class="app-actions no-print">
+        <a class="btn-human" href="/pos">← Back to POS</a>
+        <% if (!user || user.role === 'ADMIN' || (user.perms && user.perms.canPrintReports)) { %>
+          <button type="button" onclick="window.print()" class="btn-human btn-primary">🖨️ Print Report</button>
+        <% } %>
+        <img src="/assets/job-logo-png.png" class="side-logo" alt="Job Logo" />
+      </div>
+    </header>
+
+    <div class="card">
+
+      <!-- TOP ACTIONS ROW -->
+      <div class="no-print" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+        <a class="btn-human btn-primary"
+           href="/reports/monthly/export.xlsx<%= (from || to) ? ('?from=' + encodeURIComponent(from || '') + '&to=' + encodeURIComponent(to || '')) : '' %>">
+          ⬇️ Export Excel
+        </a>
+        <a class="btn-human" href="/reports/monthly">Reset</a>
+      </div>
+
+      <!-- FILTER OPTIONS -->
+      <form class="filter-row no-print" id="filterForm" method="get" action="/reports/monthly">
+        <div>
+          <label>Quick Filter</label>
+          <select id="preset" name="preset">
+            <option value="">Select…</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="lastMonth">Last Month</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+
+        <div>
+          <label>From</label>
+          <input type="date" id="from" name="from" value="<%= from || '' %>" />
+        </div>
+
+        <div>
+          <label>To</label>
+          <input type="date" id="to" name="to" value="<%= to || '' %>" />
+        </div>
+
+        <div>
+          <button type="submit" class="btn-human btn-primary">Apply Filter ✅</button>
+        </div>
+      </form>
+
+      <div style="margin:8px 0 14px 0;font-weight:900;">
+        Total Sales: $<%= (total||0).toFixed(2) %>
+      </div>
+
+      <h3>Invoice Lines</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Category</th>
+            <th style="text-align:center">Qty</th>
+            <th style="text-align:right">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (rows || []).forEach(function(r){ %>
+            <tr>
+              <td><%= r.invoiceNumber != null ? r.invoiceNumber : '-' %></td>
+              <td><%= (r.category || '').replaceAll('_',' ') %></td>
+              <td style="text-align:center"><%= r.qty || 0 %></td>
+              <td style="text-align:right">$<%= (r.total || 0).toFixed(2) %></td>
+            </tr>
+          <% }) %>
+          <% if(!rows || rows.length === 0){ %>
+            <tr><td colspan="4">No sales in this date range.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <h3 style="margin-top:16px">Summary by Category</h3>
+      <table style="margin-top:8px">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Quantity</th>
+            <th style="text-align:right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% (grouped || []).forEach(function(g){ %>
+            <tr>
+              <td><%= (g.category || '').replaceAll('_',' ') %></td>
+              <td><%= g.qty %></td>
+              <td style="text-align:right">$<%= (g.total||0).toFixed(2) %></td>
+            </tr>
+          <% }) %>
+          <% if(!grouped || grouped.length === 0){ %>
+            <tr><td colspan="3">No data.</td></tr>
+          <% } %>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2" style="text-align:right;font-weight:900">Total Sales</td>
+            <td style="text-align:right;font-weight:900">$<%= (total||0).toFixed(2) %></td>
+          </tr>
+        </tfoot>
+      </table>
+
+    </div>
+  </div>
+
+  <script>
+    function toISODate(d){
+      const x = new Date(d);
+      const yyyy = x.getFullYear();
+      const mm = String(x.getMonth()+1).padStart(2,'0');
+      const dd = String(x.getDate()).padStart(2,'0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function startOfWeek(d){
+      const x = new Date(d);
+      const day = x.getDay();
+      const diff = (day === 0 ? 6 : day - 1);
+      x.setDate(x.getDate() - diff);
+      x.setHours(0,0,0,0);
+      return x;
+    }
+
+    function endOfWeek(d){
+      const s = startOfWeek(d);
+      const e = new Date(s);
+      e.setDate(e.getDate() + 6);
+      return e;
+    }
+
+    function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+    function endOfMonth(d){ return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
+
+    const preset = document.getElementById('preset');
+    const fromEl = document.getElementById('from');
+    const toEl = document.getElementById('to');
+
+    function applyPreset(val){
+      const now = new Date();
+
+      if(val === 'today'){
+        fromEl.value = toISODate(now);
+        toEl.value = toISODate(now);
+      } else if(val === 'week'){
+        fromEl.value = toISODate(startOfWeek(now));
+        toEl.value = toISODate(endOfWeek(now));
+      } else if(val === 'month'){
+        fromEl.value = toISODate(startOfMonth(now));
+        toEl.value = toISODate(endOfMonth(now));
+      } else if(val === 'lastMonth'){
+        const last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        fromEl.value = toISODate(startOfMonth(last));
+        toEl.value = toISODate(endOfMonth(last));
+      }
+    }
+
+    preset.addEventListener('change', (e)=> applyPreset(e.target.value));
+
+    // Set initial preset
+    if(!fromEl.value && !toEl.value){
+      preset.value = 'month';
+      applyPreset('month');
+    } else {
+      preset.value = 'custom';
+    }
+  </script>
+  <%- include('partials/footer') %>
+</body>
+</html>

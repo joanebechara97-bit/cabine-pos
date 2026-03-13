@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title || "Audit Logs" %></title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="site">
+
+  <header class="app-header">
+    <div class="app-title">Audit Logs</div>
+    <div class="app-actions">
+      <a class="btn" href="/admin">Back</a>
+      <a class="btn" href="/admin/users">Users</a>
+      <a class="btn" href="/pos">POS</a>
+    </div>
+  </header>
+
+  <div class="card" style="margin-top:18px; overflow:auto;">
+    <% if (message) { %>
+      <p style="color:#b91c1c; font-weight:800;"><%= message %></p>
+    <% } %>
+
+    <form method="GET" action="/admin/logs" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+      <input name="q" placeholder="Search actor / action / details..." value="<%= q || '' %>" style="max-width:360px;" />
+      <button class="btn" type="submit">Search</button>
+      <a class="btn" href="/admin/logs">Clear</a>
+      <a class="btn primary" href="/admin/logs/export.xlsx<%= q ? ('?q=' + encodeURIComponent(q)) : '' %>">Export Excel</a>
+    </form>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="min-width:170px;">Time</th>
+          <th style="min-width:140px;">Actor</th>
+          <th style="min-width:160px;">Action</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!logs || logs.length === 0) { %>
+          <tr>
+            <td colspan="4" class="muted">No logs yet.</td>
+          </tr>
+        <% } %>
+
+        <% (logs || []).forEach(l => { %>
+          <tr>
+            <td><%= l.createdAt ? new Date(l.createdAt).toLocaleString() : '' %></td>
+            <td><%= l.actorName || '-' %></td>
+            <td><span class="badge"><%= l.action %></span></td>
+            <td style="white-space:pre-wrap;"><%= l.details || '' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<%- include('partials/footer') %>
+</body>
+</html>

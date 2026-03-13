@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .wrap{ max-width: 1100px; margin: 18px auto; padding: 0 14px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+    .cardx{ background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:14px; }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{ padding:10px; border-top:1px solid #eee; text-align:left; }
+    th{ background:#f7f7f7; border-top:none; font-weight:600; }
+    input, select{ padding:9px; border:1px solid #ddd; border-radius:10px; width:100%; }
+    .btn{ padding:9px 12px; border-radius:10px; border:1px solid #111; background:#111; color:#fff; cursor:pointer; }
+    .btn2{ padding:9px 12px; border-radius:10px; border:1px solid #bbb; background:#fff; color:#111; cursor:pointer; }
+    .muted{ opacity:.7; }
+    .pill{ display:inline-block; padding:4px 10px; border:1px solid #ddd; border-radius:999px; font-size:12px; }
+    .danger{ border-color:#ffb3b3; background:#ffecec; color:#7a0000; }
+    .ok{ border-color:#bde5bd; background:#effcef; color:#124d12; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+
+  <div>
+    <h2 style="margin:0;">Items & Prices</h2>
+    <div class="muted">Rename items, change prices, add new items, or deactivate.</div>
+  </div>
+
+  <a class="btn btn-secondary" href="/admin">
+    ← Back
+  </a>
+
+</div>
+
+    <div id="msg" class="cardx" style="display:none; margin-bottom:12px;"></div>
+
+    <div class="cardx" style="margin-bottom:12px;">
+      <h3 style="margin:0 0 10px 0;">Add new item</h3>
+      <div class="row">
+        <div style="flex: 1; min-width: 240px;">
+          <label class="muted">Name</label>
+          <input id="newName" placeholder="e.g. Adult WD" />
+        </div>
+        <div style="width: 160px;">
+          <label class="muted">Type</label>
+          <select id="newType">
+            <option value="service">Service</option>
+            <option value="product">Product</option>
+          </select>
+        </div>
+        <div style="width: 160px;">
+          <label class="muted">Price</label>
+          <input id="newPrice" type="number" step="0.01" placeholder="0.00" />
+        </div>
+        <div style="width: 160px;">
+          <button class="btn" onclick="createItem()">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cardx">
+      <div class="row" style="justify-content:space-between; margin-bottom: 8px;">
+        <h3 style="margin:0;">All items</h3>
+        <div class="row">
+          <label class="muted" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="showInactive" onchange="loadItems()" />
+            Show inactive
+          </label>
+          <button class="btn2" onclick="loadItems()">Refresh</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40%;">Name</th>
+            <th style="width: 14%;">Type</th>
+            <th style="width: 14%;">Price</th>
+            <th style="width: 16%;">Status</th>
+            <th style="width: 16%;"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="5" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API = "/api/items";
+
+    function showMsg(text, kind="ok") {
+      const box = document.getElementById("msg");
+      box.style.display = "block";
+      box.className = "cardx " + (kind === "danger" ? "danger" : "ok");
+      box.innerText = text;
+      setTimeout(() => { box.style.display = "none"; }, 2500);
+    }
+
+    function rowHtml(item) {
+      const statusPill = item.isActive
+        ? `<span class="pill ok">Active</span>`
+        : `<span class="pill danger">Inactive</span>`;
+
+      return `
+        <tr data-id="${item.id}">
+          <td><input value="${escapeHtml(item.name)}" id="name-${item.id}" /></td>
+          <td>
+            <select id="type-${item.id}">
+              <option value="service" ${item.type === "service" ? "selected" : ""}>Service</option>
+              <option value="product" ${item.type === "product" ? "selected" : ""}>Product</option>
+            </select>
+          </td>
+          <td><input value="${item.price}" type="number" step="0.01" id="price-${item.id}" /></td>
+          <td>${statusPill}</td>
+          <td style="display:flex; gap:8px; justify-content:flex-end;">
+            <button class="btn" onclick="saveItem('${item.id}')">Save</button>
+            <button class="btn2" onclick="toggleActive('${item.id}', ${item.isActive ? "false" : "true"})">
+              ${item.isActive ? "Deactivate" : "Activate"}
+            </button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function loadItems() {
+      const showInactive = document.getElementById("showInactive").checked;
+      const url = showInactive ? `${API}?all=1` : API;
+
+      const r = await fetch(url);
+      const items = await r.json();
+
+      const tbody = document.getElementById("tbody");
+      if (!Array.isArray(items) || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="muted">No items yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(rowHtml).join("");
+    }
+
+    async function createItem() {
+      const name = document.getElementById("newName").value.trim();
+      const type = document.getElementById("newType").value;
+      const price = document.getElementById("newPrice").value;
+
+      if (!name) return showMsg("Name is required", "danger");
+
+      const r = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, type, price })
+      });
+
+      const data = await r.json();
+      if (!r.ok) return showMsg(data?.message || "Failed to add item", "danger");
+
+      document.getElementById("newName").value = "";
+      document.getElementById("newPrice").value = "";
+      showMsg("Item added ✅");
+      loadItems();
+    }
+
+    async function saveItem(id) {
+      const name = document.getElementById(`name-${id}`).value.trim();
+      const type = document.getElementById(`type-${id}`).value;
+      const price = document.getElementById(`price-${id}`).value;
+
+      const r = await fetch(`${API}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, type, price })
+      });
+
+      const data = await r.json();
+      if (!r.ok) return showMsg(data?.message || "Save failed", "danger");
+
+      showMsg("Saved ✅");
+      loadItems();
+    }
+
+    async function toggleActive(id, isActive) {
+      const r = await fetch(`${API}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive })
+      });
+
+      const data = await r.json();
+      if (!r.ok) return showMsg(data?.message || "Update failed", "danger");
+
+      showMsg(isActive ? "Activated ✅" : "Deactivated ✅");
+      loadItems();
+    }
+
+    loadItems();
+  </script>
+  <%- include('partials/footer') %>
+</body>
+</html>

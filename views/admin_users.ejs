@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title || "Users" %></title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="site">
+  <header class="app-header">
+    <div class="app-title">Users</div>
+    <div class="app-actions">
+      <a class="btn primary" href="/admin/users/new">+ New User</a>
+      <a class="btn" href="/admin">Back</a>
+      <a class="btn" href="/pos">POS</a>
+    </div>
+  </header>
+
+  <div class="card" style="margin:16px; overflow:auto;">
+    <% if (message) { %>
+      <p style="color:#b91c1c; font-weight:800;"><%= message %></p>
+    <% } %>
+
+    <form method="GET" action="/admin/users" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+      <input name="q" placeholder="Search username..." value="<%= q || '' %>" style="max-width:320px;" />
+      <button class="btn" type="submit">Search</button>
+      <a class="btn" href="/admin/users">Clear</a>
+    </form>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th style="min-width:280px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% (users || []).forEach(u => { %>
+          <tr>
+            <td><%= u.username %></td>
+            <td><%= u.role %></td>
+            <td>
+              <% if (u.isActive) { %>
+                <span class="badge on">Active</span>
+              <% } else { %>
+                <span class="badge off">Inactive</span>
+              <% } %>
+            </td>
+            <td><%= u.createdAt ? new Date(u.createdAt).toLocaleString() : '' %></td>
+            <td style="display:flex; gap:8px; flex-wrap:wrap;">
+              <a class="btn" href="/admin/users/<%= u.id %>/edit">Edit</a>
+
+              <form method="POST" action="/admin/users/<%= u.id %>/toggle" style="display:inline;">
+                <button class="btn success" type="submit">
+                  <%= u.isActive ? 'Deactivate' : 'Activate' %>
+                </button>
+              </form>
+
+              <form method="POST" action="/admin/users/<%= u.id %>/delete" style="display:inline;" onsubmit="return confirm('Delete user <%= u.username %>?');">
+                <button class="btn danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('partials/footer') %>
+</body>
+</html>

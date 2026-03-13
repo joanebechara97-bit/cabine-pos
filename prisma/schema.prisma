@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id             Int       @id @default(autoincrement())
+  status         String    @default("DRAFT")
+  invoiceNumber  Int?      @unique
+  confirmedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  voidedAt       DateTime?
+  voidReason     String?
+  voidedById     Int?
+  voidedByName   String?
+  refundedAt     DateTime?
+  refundReason   String?
+  refundMethod   String?
+  refundAmount   Int?
+  refundedById   Int?
+  refundedByName String?
+
+  createdById Int?
+  createdBy   User? @relation("UserOrders", fields: [createdById], references: [id])
+
+  discountValue  Float  @default(0)
+  discountType   String @default("fixed")
+  discountAmount Float  @default(0)
+
+  items OrderItem[]
+}
+
+model Item {
+  id        String   @id @default(cuid())
+  name      String
+  price     Float
+  type      String   @default("service")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id      Int   @id @default(autoincrement())
+  orderId Int
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  category String
+  qty      Int
+  price    Float
+}
+
+model InvoiceCounter {
+  id     Int @id @default(1)
+  lastNo Int @default(0)
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  username        String   @unique
+  passwordHash    String
+  role            String   @default("FRONT_DESK")
+  permissionsJson String   @default("{}")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  orders Order[] @relation("UserOrders")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  actorId   Int?
+  actorName String?
+  action    String
+  details   String?
+
+  @@index([createdAt])
+}
+
+model user_sessions {
+  sid    String   @id(map: "session_pkey") @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+}
+model License {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  business  String?
+  expiresAt DateTime?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

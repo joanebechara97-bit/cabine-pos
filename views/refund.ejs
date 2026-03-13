@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title || "Void / Refund Invoice" %></title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="site">
+
+  <header class="app-header">
+    <div class="app-title">Void / Refund Invoice</div>
+    <div class="app-actions">
+      <a class="btn logout-btn" href="/pos">POS</a>
+      <% if (user && user.role === 'ADMIN') { %>
+        <a class="btn logout-btn" href="/admin">Admin</a>
+      <% } %>
+    </div>
+  </header>
+
+  <div class="card" style="margin-top:18px;">
+    <% const inv = (typeof invoice !== 'undefined' && invoice) ? invoice : ''; %>
+
+    <% if (message) { %>
+      <p style="color:#b91c1c; font-weight:800;"><%= message %></p>
+    <% } %>
+
+    <form method="GET" action="/refund" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
+      <div style="max-width:260px;">
+        <label style="font-weight:900; display:block; margin-bottom:6px;">Invoice Number</label>
+        <input name="invoice" placeholder="e.g. 120" value="<%= inv %>" />
+      </div>
+
+      <button class="btn primary" type="submit">Search</button>
+      <a class="btn" href="/refund">Clear</a>
+    </form>
+
+    <% if (found) { %>
+      <div style="margin-top:16px; border-top:1px solid #e5eaf2; padding-top:14px;">
+        <div style="font-weight:900; margin-bottom:8px;">Invoice Found</div>
+
+        <div class="badge <%= found.status === 'CONFIRMED' ? 'on' : 'off' %>">
+          Status: <%= found.status %>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div><b>Invoice #:</b> <%= found.invoiceNumber %></div>
+          <div><b>Confirmed At:</b> <%= found.confirmedAt ? new Date(found.confirmedAt).toLocaleString() : '-' %></div>
+          <div><b>Total:</b> $<%= (found.total || 0).toFixed(2) %></div>
+        </div>
+
+        <% if (found.status !== 'CONFIRMED') { %>
+          <div class="muted" style="margin-top:10px; font-weight:800;">
+            This invoice is not CONFIRMED, so it can’t be voided.
+          </div>
+        <% } else { %>
+          <form method="POST" action="/refund/void" style="margin-top:14px; display:grid; gap:10px; max-width:520px;">
+            <input type="hidden" name="orderId" value="<%= found.id %>" />
+
+            <label>
+              <div style="font-weight:900; margin-bottom:6px;">Reason</div>
+              <input name="reason" placeholder="Reason for void/refund..." required />
+            </label>
+
+            <button class="btn danger" type="submit"
+              onclick="return confirm('Are you sure you want to VOID this invoice? This will be logged.');">
+              Void Invoice
+            </button>
+
+            <div class="muted" style="font-size:12px;">
+              Tip: Only CONFIRMED invoices can be voided. Voided invoices stay in reports but marked as VOIDED.
+            </div>
+          </form>
+        <% } %>
+      </div>
+    <% } else if (inv) { %>
+      <div class="muted" style="margin-top:14px; font-weight:800;">
+        No invoice loaded yet. If you searched and got nothing, it means the invoice number wasn’t found.
+      </div>
+    <% } %>
+
+  </div>
+
+</div>
+<%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>POS Dashboard - San Stephano</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e6ecf5;
+      --primary:#2563eb;
+      --primary2:#60a5fa;
+      --green:#16a34a;
+      --orange:#f59e0b;
+      --red:#ef4444;
+      --shadow: 0 14px 40px rgba(15,23,42,.10);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 500px at 85% 10%, rgba(37,99,235,.10), transparent 60%),
+        radial-gradient(900px 480px at 15% 20%, rgba(99,102,241,.08), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+    }
+
+    /* ===== Layout ===== */
+    .app{
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px 14px 30px;
+      display:grid;
+      grid-template-columns: 270px 1fr;
+      gap: 14px;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      position: sticky;
+      top: 14px;
+      height: calc(100vh - 28px);
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+      overflow:auto;
+    }
+
+    .brandRow{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding: 8px 8px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .brandRow img{ height:52px; width:auto; object-fit:contain; }
+    .brandText{
+      line-height:1.15;
+    }
+    .brandText .title{
+      font-weight: 1000;
+      font-size: 14px;
+      letter-spacing:.2px;
+    }
+    .brandText .sub{
+      font-weight: 800;
+      font-style: italic;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding: 6px 4px;
+    }
+    .nav a{
+      text-decoration:none;
+      color: #0f172a;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border: 1px solid transparent;
+    }
+    .nav a:hover{
+      background:#f8fafc;
+      border-color: var(--line);
+    }
+    .nav a.active{
+      background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(96,165,250,.10));
+      border-color: rgba(37,99,235,.22);
+    }
+    .badge{
+      font-size: 11px;
+      font-weight: 1000;
+      color: #1f2937;
+      background:#f1f5f9;
+      border:1px solid var(--line);
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+
+    .sidebarFooter{
+      margin-top:auto;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .jobMark{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .jobMark img{ height:42px; width:auto; object-fit:contain; }
+    .smallMuted{
+      color:var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height:1.3;
+      text-align:right;
+    }
+
+    /* ===== Main ===== */
+    .main{
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    .topbar{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .topTitle{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .topTitle .h1{
+      font-size: 18px;
+      font-weight: 1000;
+      letter-spacing:.2px;
+    }
+    .topTitle .h2{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .topActions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      border: 1px solid var(--line);
+      background:#f8fafc;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn{
+      border: 1px solid var(--line);
+      background:#fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 1000;
+      cursor:pointer;
+      font-size: 13px;
+    }
+    .btnPrimary{
+      border: none;
+      color:#fff;
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      box-shadow: 0 10px 20px rgba(37,99,235,.18);
+    }
+
+    /* ===== KPI cards ===== */
+    .grid4{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 14px;
+    }
+    .kpiTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .kpiLabel{
+      color: var(--muted);
+      font-weight: 900;
+      font-size: 12px;
+    }
+    .kpiValue{
+      font-size: 22px;
+      font-weight: 1000;
+      letter-spacing:-.3px;
+      margin-top: 4px;
+    }
+    .kpiDelta{
+      font-size: 12px;
+      font-weight: 1000;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background:#f8fafc;
+      white-space:nowrap;
+    }
+    .good{ color: var(--green); border-color: rgba(22,163,74,.25); background: rgba(22,163,74,.06); }
+    .warn{ color: #b45309; border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.08); }
+    .bad{ color: #b91c1c; border-color: rgba(239,68,68,.30); background: rgba(239,68,68,.08); }
+
+    /* ===== Two-column area ===== */
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 12px;
+      align-items:start;
+    }
+
+    /* ===== Table ===== */
+    .tableWrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius: 14px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:#fff;
+      min-width: 760px;
+    }
+    thead th{
+      text-align:left;
+      font-size: 12px;
+      font-weight: 1000;
+      color: var(--muted);
+      background:#f8fafc;
+      border-bottom:1px solid var(--line);
+      padding: 10px 12px;
+    }
+    tbody td{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 800;
+      color:#0f172a;
+      white-space:nowrap;
+    }
+    tbody tr:hover{ background:#fbfdff; }
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 1000;
+      border: 1px solid var(--line);
+      background:#f8fafc;
+    }
+
+    /* ===== Quick POS panel ===== */
+    .posRow{
+      display:grid;
+      grid-template-columns: 1fr 110px 140px;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .posRow input, .posRow select{
+      width:100%;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background:#f8fafc;
+      font-weight: 900;
+      font-size: 13px;
+      outline:none;
+    }
+    .posRow input:focus, .posRow select:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.10);
+      background:#fff;
+    }
+    .posTotals{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .miniKpi{
+      border: 1px solid var(--line);
+      background:#f8fafc;
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .miniKpi .m1{ color: var(--muted); font-size: 12px; font-weight: 1000; }
+    .miniKpi .m2{ font-size: 18px; font-weight: 1100; margin-top: 4px; }
+
+    .rowBtns{
+      margin-top: 12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    /* ===== Lists ===== */
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .listItem{
+      border: 1px solid var(--line);
+      background:#fff;
+      border-radius: 14px;
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .listItem .left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .listItem .name{
+      font-weight: 1000;
+      font-size: 13px;
+    }
+    .listItem .sub{
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    /* ===== Footer ===== */
+    .copyright{
+      text-align:center;
+      padding: 16px 10px;
+      font-size: 13px;
+      font-weight: 1000;
+      color: var(--muted);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 1100px){
+      .app{ grid-template-columns: 1fr; }
+      .sidebar{ position:relative; height:auto; }
+      .grid4{ grid-template-columns: 1fr 1fr; }
+      .grid2{ grid-template-columns: 1fr; }
+      table{ min-width: 680px; }
+    }
+    @media (max-width: 520px){
+      .grid4{ grid-template-columns: 1fr; }
+      .posRow{ grid-template-columns: 1fr; }
+    }
+    .actions.single{
+  justify-content: center;
+}
+
+.actions.single button{
+  max-width: 260px;
+}
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brandRow">
+        <img src="/assets/logo-ss-png.png" alt="San Stephano Resort" />
+        <div class="brandText">
+          <div class="title">San Stephano Resort</div>
+          <div class="sub">Daily Access • POS</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="active" href="/dashboard">Dashboard <span class="badge">Live</span></a>
+        <a href="/pos">POS Terminal</a>
+        <a href="/sales">Sales</a>
+        <a href="/inventory">Inventory</a>
+        <a href="/suppliers">Suppliers</a>
+        <a href="/staff">Staff</a>
+        <a href="/reports/daily">Reports</a>
+        <a href="/settings">Settings</a>
+      </nav>
+
+      <div class="sidebarFooter">
+        <div class="jobMark">
+          <img src="/assets/job-logo-png.png" alt="J.O.B" />
+        </div>
+        <div class="smallMuted">
+          Internal Portal<br/>
+          v1.0
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topTitle">
+          <div class="h1">POS Dashboard</div>
+          <div class="h2" id="todayText">Today overview</div>
+        </div>
+
+        <div class="topActions">
+          <div class="pill" id="greetingPill">Good day • Shift open</div>
+          <div class="dropdown" id="reportsDropdown">
+            <button class="dropdown-toggle">Reports ▾</button>
+            <div class="dropdown-menu">
+              <a href="/reports/daily">Daily report</a>
+              <a href="/reports/monthly">Monthly report</a>
+            </div>
+          </div>
+          <button class="btn">Open Cash Drawer</button>
+          <button class="btn btnPrimary">New Sale</button>
+        </div>
+      </header>
+
+      <!-- KPI CARDS -->
+      <section class="grid4">
+        <div class="card">
+          <div class="kpiTop">
+            <div>
+              <div class="kpiLabel">Today Sales</div>
+              <div class="kpiValue">1,250,000 LBP</div>
+            </div>
+            <div class="kpiDelta good">+8.2%</div>
+          </div>
+          <div class="kpiLabel">vs yesterday</div>
+        </div>
+
+        <div class="card">
+          <div class="kpiTop">
+            <div>
+              <div class="kpiLabel">Cash</div>
+              <div class="kpiValue">540,000 LBP</div>
+            </div>
+            <div class="kpiDelta warn">Shift</div>
+          </div>
+          <div class="kpiLabel">cash payments</div>
+        </div>
+
+        <div class="card">
+          <div class="kpiTop">
+            <div>
+              <div class="kpiLabel">Card</div>
+              <div class="kpiValue">710,000 LBP</div>
+            </div>
+            <div class="kpiDelta good">Stable</div>
+          </div>
+          <div class="kpiLabel">card payments</div>
+        </div>
+
+        <div class="card">
+          <div class="kpiTop">
+            <div>
+              <div class="kpiLabel">Transactions</div>
+              <div class="kpiValue">42</div>
+            </div>
+            <div class="kpiDelta good">+5</div>
+          </div>
+          <div class="kpiLabel">today</div>
+        </div>
+      </section>
+
+      <!-- MAIN GRID -->
+      <section class="grid2">
+
+        <!-- Recent transactions -->
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div>
+              <div style="font-weight:1000; font-size:14px;">Recent Transactions</div>
+              <div style="color:var(--muted); font-weight:800; font-size:12px; margin-top:4px;">
+                Latest sales and payment status
+              </div>
+            </div>
+            <button class="btn">View all</button>
+          </div>
+
+          <div style="margin-top:12px;" class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Receipt</th>
+                  <th>Customer</th>
+                  <th>Payment</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>12:18</td>
+                  <td>#SS-1042</td>
+                  <td>Walk-in</td>
+                  <td>Cash</td>
+                  <td>95,000 LBP</td>
+                  <td><span class="status good">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>12:02</td>
+                  <td>#SS-1041</td>
+                  <td>Room 214</td>
+                  <td>Card</td>
+                  <td>210,000 LBP</td>
+                  <td><span class="status good">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>11:45</td>
+                  <td>#SS-1040</td>
+                  <td>Walk-in</td>
+                  <td>Cash</td>
+                  <td>60,000 LBP</td>
+                  <td><span class="status warn">Pending</span></td>
+                </tr>
+                <tr>
+                  <td>11:20</td>
+                  <td>#SS-1039</td>
+                  <td>Room 118</td>
+                  <td>Card</td>
+                  <td>130,000 LBP</td>
+                  <td><span class="status good">Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick POS + Low stock -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <!-- Quick POS -->
+          <div class="card">
+            <div style="font-weight:1000; font-size:14px;">Quick Sale</div>
+            <div style="color:var(--muted); font-weight:800; font-size:12px; margin-top:4px;">
+              Add an item quickly and proceed to payment
+            </div>
+
+            <div class="posRow">
+              <select>
+                <option>Choose item</option>
+                <option>Water (Small)</option>
+                <option>Water (Large)</option>
+                <option>Coffee</option>
+                <option>Snack</option>
+              </select>
+              <input type="number" min="1" value="1" />
+              <input type="text" value="50,000 LBP" />
+            </div>
+
+            <div class="posTotals">
+              <div class="miniKpi">
+                <div class="m1">Subtotal</div>
+                <div class="m2">50,000 LBP</div>
+              </div>
+              <div class="miniKpi">
+                <div class="m1">Total</div>
+                <div class="m2">50,000 LBP</div>
+              </div>
+            </div>
+
+            <div class="rowBtns">
+              <button class="btn btnPrimary" style="flex:1;">Pay Now</button>
+              <button class="btn" style="flex:1;">Save Draft</button>
+            </div>
+          </div>
+
+          <!-- Low stock -->
+          <div class="card">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <div>
+                <div style="font-weight:1000; font-size:14px;">Low Stock</div>
+                <div style="color:var(--muted); font-weight:800; font-size:12px; margin-top:4px;">
+                  Items that need restocking
+                </div>
+              </div>
+              <span class="badge">4</span>
+            </div>
+
+            <div class="list">
+              <div class="listItem">
+                <div class="left">
+                  <div class="name">Water (Small)</div>
+                  <div class="sub">Remaining: 8</div>
+                </div>
+                <span class="kpiDelta warn">Low</span>
+              </div>
+              <div class="listItem">
+                <div class="left">
+                  <div class="name">Coffee Cups</div>
+                  <div class="sub">Remaining: 12</div>
+                </div>
+                <span class="kpiDelta warn">Low</span>
+              </div>
+              <div class="listItem">
+                <div class="left">
+                  <div class="name">Snack Bar</div>
+                  <div class="sub">Remaining: 5</div>
+                </div>
+                <span class="kpiDelta bad">Critical</span>
+              </div>
+            </div>
+
+            <div class="rowBtns">
+              <button class="btn">Create PO</button>
+              <button class="btn">Inventory</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <div class="copyright">© J.O.B +96171016203</div>
+    </main>
+  </div>
+
+  <script>
+    // Greeting + date
+    const h = new Date().getHours();
+    const greeting = h < 12 ? "Good morning" : (h < 18 ? "Good afternoon" : "Good evening");
+    const dateStr = new Date().toLocaleDateString(undefined, { weekday:"long", year:"numeric", month:"short", day:"numeric" });
+
+    document.getElementById("greetingPill").textContent = `${greeting} • Shift open`;
+    document.getElementById("todayText").textContent = dateStr;
+    // dropdown toggles
+    document.querySelectorAll('.dropdown-toggle').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const root = btn.closest('.dropdown');
+        root.classList.toggle('show');
+      });
+    });
+    document.addEventListener('click', (e)=>{
+      document.querySelectorAll('.dropdown').forEach(d=>{
+        if(!d.contains(e.target)) d.classList.remove('show');
+      });
+    });
+  </script>
+  <%- include('partials/footer') %>
+</body>
+</html>

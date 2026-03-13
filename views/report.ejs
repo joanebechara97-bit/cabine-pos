@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= (period||'report').charAt(0).toUpperCase() + (period||'report').slice(1) %> Report</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="site">
+    <% /* safe defaults for older renders or missing locals — also check locals.* */ %>
+    <% 
+      var grouped = (typeof grouped !== 'undefined') ? grouped : (typeof locals !== 'undefined' && typeof locals.grouped !== 'undefined' ? locals.grouped : []);
+      var transactions = (typeof transactions !== 'undefined') ? transactions : (typeof locals !== 'undefined' && typeof locals.transactions !== 'undefined' ? locals.transactions : []);
+      var from = (typeof from !== 'undefined') ? from : (typeof locals !== 'undefined' && typeof locals.from !== 'undefined' ? locals.from : '');
+      var to = (typeof to !== 'undefined') ? to : (typeof locals !== 'undefined' && typeof locals.to !== 'undefined' ? locals.to : '');
+      var total = (typeof total !== 'undefined') ? total : (typeof locals !== 'undefined' && typeof locals.total !== 'undefined' ? locals.total : 0);
+    %>
+    <header class="app-header">
+      <div class="brand">
+        <img src="/assets/logo-ss-png.png" alt="Company" />
+      </div>
+      <div class="app-title">San Stephano Daily Access — <%= (period||'report').charAt(0).toUpperCase() + (period||'report').slice(1) %> Report</div>
+      <div class="app-actions">
+        <div class="dropdown" id="reportsDropdown">
+          <button class="dropdown-toggle">Reports ▾</button>
+          <div class="dropdown-menu">
+            <a href="/reports/daily">Daily report</a>
+            <a href="/reports/monthly">Monthly report</a>
+          </div>
+        </div>
+        <a class="btn" href="/pos">Back to POS</a>
+        <button onclick="window.print()" class="btn" style="margin-left:8px">Print</button>
+        <img src="/assets/job-logo-png.png" class="side-logo" alt="Job Logo" />
+      </div>
+    </header>
+
+    <div class="card">
+      <% /* already normalized above; ensure arrays */ %>
+      <% grouped = Array.isArray(grouped) ? grouped : []; transactions = Array.isArray(transactions) ? transactions : []; from = typeof from === 'string' ? from : ''; to = typeof to === 'string' ? to : ''; total = typeof total === 'number' ? total : 0; %>
+
+      <% if (period === 'daily') { %>
+        <div style="margin-bottom:12px;font-size:14px;color:#374151">Date: <%= new Date().toLocaleDateString() %></div>
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Quantity</th><th>Total Amount</th></tr>
+          </thead>
+          <tbody>
+              <% (grouped || []).forEach(function(g){ %>
+              <tr>
+                <td><%= g.category.replace('_',' ') %></td>
+                <td><%= g.qty %></td>
+                <td>$<%= g.total.toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="2">Total Sales</td><td>$<%= total.toFixed(2) %></td></tr>
+          </tfoot>
+        </table>
+
+      <% } else { %>
+        <form method="get" action="/reports/monthly" style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+            <label>From: <input type="date" name="from" value="<%= typeof from !== 'undefined' ? from : '' %>" /></label>
+            <label>To: <input type="date" name="to" value="<%= typeof to !== 'undefined' ? to : '' %>" /></label>
+          <button type="submit">Filter</button>
+        </form>
+
+        <h3>Transactions</h3>
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Category</th><th>Quantity</th><th>Amount</th></tr>
+          </thead>
+          <tbody>
+            <% transactions.forEach(function(t){ %>
+              <tr>
+                <td><%= new Date(t.date).toLocaleString() %></td>
+                <td><%= t.category.replace('_',' ') %></td>
+                <td><%= t.qty || 1 %></td>
+                <td>$<%= (t.amount || 0).toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="3">Total Sales</td><td>$<%= total.toFixed(2) %></td></tr>
+          </tfoot>
+        </table>
+
+        <h3 style="margin-top:16px">Summary by Category</h3>
+        <table style="margin-top:8px">
+          <thead><tr><th>Category</th><th>Quantity</th><th>Total</th></tr></thead>
+          <tbody>
+              <% (grouped || []).forEach(function(g){ %>
+              <tr>
+                <td><%= g.category.replace('_',' ') %></td>
+                <td><%= g.qty %></td>
+                <td>$<%= g.total.toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+
+    </div>
+  </div>
+  <%- include('partials/footer') %>
+</body>
+</html>
