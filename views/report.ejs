@@ -39,7 +39,7 @@
       <% grouped = Array.isArray(grouped) ? grouped : []; transactions = Array.isArray(transactions) ? transactions : []; from = typeof from === 'string' ? from : ''; to = typeof to === 'string' ? to : ''; total = typeof total === 'number' ? total : 0; %>
 
       <% if (period === 'daily') { %>
-        <div style="margin-bottom:12px;font-size:14px;color:#374151">Date: <%= new Date().toLocaleDateString() %></div>
+        <div style="margin-bottom:12px;font-size:14px;color:#374151">Date: <%= new Date().toLocaleDateString('en-GB') %></div>
         <table>
           <thead>
             <tr><th>Category</th><th>Quantity</th><th>Total Amount</th></tr>
@@ -73,7 +73,7 @@
           <tbody>
             <% transactions.forEach(function(t){ %>
               <tr>
-                <td><%= new Date(t.date).toLocaleString() %></td>
+                <td><%= new Date(t.date).toLocaleString('en-GB') %></td>
                 <td><%= t.category.replace('_',' ') %></td>
                 <td><%= t.qty || 1 %></td>
                 <td>$<%= (t.amount || 0).toFixed(2) %></td>

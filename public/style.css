@@ -219,7 +219,9 @@ input:focus, select:focus{
   border-color:#93c5fd;
   box-shadow:0 0 0 3px rgba(59,130,246,.15);
 }
-
+.info-value {
+  font-weight: 800;
+}
 /* Simple class-based table helper */
 .table{
   width:100%;

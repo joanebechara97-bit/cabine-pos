@@ -6,10 +6,21 @@
   <link rel="stylesheet" href="/style.css" />
 
   <style>
-    body { font-size: 13px; }
+    body {
+      font-size: 13px;
+      background: #f6f8fb;
+      margin: 0;
+    }
 
-    /* "Human" buttons that match POS feel */
-    .btn-human{
+    .app-actions {
+      position: relative;
+      z-index: 10;
+    }
+
+    .btn-human {
+      position: relative;
+      z-index: 20;
+      pointer-events: auto;
       padding: 10px 14px;
       border-radius: 12px;
       border: 1px solid #e5eaf2;
@@ -22,74 +33,275 @@
       align-items: center;
       gap: 8px;
     }
-    .btn-human:hover{ background:#f8fafc; }
-    .btn-primary{
-      background:#0f172a;
-      color:#fff;
-      border-color:#0f172a;
-    }
-    .btn-primary:hover{ opacity:.92; }
 
-    .filter-row{
+    .btn-human:hover { background: #f8fafc; }
+
+    .btn-primary {
+      background: #0f172a;
+      color: #fff;
+      border-color: #0f172a;
+    }
+
+    .btn-primary:hover { opacity: .92; }
+
+    .brand,
+    .side-logo {
+      pointer-events: none;
+    }
+
+    .site {
+      padding: 20px;
+    }
+
+    .filter-row {
       margin-bottom: 12px;
-      display:flex;
-      gap:10px;
-      align-items:end;
-      flex-wrap:wrap;
-    }
-    .filter-row label{ font-weight: 800; display:block; margin-bottom:4px; }
-    select, input[type="date"]{
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid #e5eaf2;
-      font-weight:700;
+      display: flex;
+      gap: 10px;
+      align-items: end;
+      flex-wrap: wrap;
     }
 
-    table th, table td { padding: 8px; }
-
-    @media print {
-      body { font-size: 11px; }
-      .no-print { display:none !important; }
-      .card { box-shadow:none !important; border:none !important; }
-      .site { padding: 0 !important; }
-      .app-header { margin-bottom: 10px; }
-      table th, table td { padding: 6px; }
+    .filter-row label {
+      font-weight: 800;
+      display: block;
+      margin-bottom: 4px;
     }
+
+    select, input[type="date"] {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #e5eaf2;
+      font-weight: 700;
+    }
+
+    .report-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    }
+
+   .report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.report-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.report-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.1;
+  margin: 0 0 4px 0;
+}
+
+.report-sub {
+  margin-top: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.report-meta {
+  text-align: right;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.5;
+  min-width: 220px;
+  flex-shrink: 0;
+}
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: #111827;
+    }
+
+    .report-section {
+      margin-top: 20px;
+    }
+
+    .report-section h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 900;
+      color: #111827;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    table th, table td {
+      padding: 10px 8px;
+      border: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    table th {
+      background: #f3f4f6;
+      font-weight: 900;
+    }
+
+    .money {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .report-footer {
+      margin-top: 22px;
+      padding-top: 12px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+  @media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    height: auto !important;
+  }
+
+  .site {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .no-print,
+  .app-header,
+  .btn-human,
+  form,
+  .site-footer {
+    display: none !important;
+  }
+
+  .report-page {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    min-height: auto !important;
+  }
+
+  .report-header,
+  .report-section,
+  .stats-grid,
+  .report-footer {
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  table {
+    width: 100% !important;
+  }
+
+  table, tr, td, th {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
   </style>
 </head>
 
 <body>
   <div class="site">
 
-    <header class="app-header">
+    <header class="app-header no-print">
       <div class="brand"><img src="/assets/logo-ss-png.png" alt="logo" /></div>
-      <div class="app-title no-print">San Stephano Daily Access — Daily Report</div>
+      <div class="app-title">San Stephano Daily Access — Daily Report</div>
 
-      <div class="app-actions no-print">
+      <div class="app-actions">
         <a class="btn-human" href="/pos">← Back to POS</a>
         <% if (!user || user.role === 'ADMIN' || (user.perms && user.perms.canPrintReports)) { %>
-          <button class="btn-human btn-primary" type="button" onclick="window.print()">🖨️ Print Report</button>
+          <button
+            class="btn-human btn-primary no-print"
+            type="button"
+            onclick="window.print(); return false;"
+            style="position: relative; z-index: 20;">
+            🖨️ Print Report
+          </button>
         <% } %>
         <img src="/assets/job-logo-png.png" class="side-logo" alt="Job Logo" />
       </div>
     </header>
 
-    <div class="card">
+    <div class="report-page">
 
-      <!-- TOP ACTIONS ROW -->
+      <div class="report-header">
+        <div class="report-brand">
+          <div>
+            <div class="report-title">Daily Report</div>
+            <div class="report-sub">San Stephano Daily Access</div>
+          </div>
+        </div>
+
+        <div class="report-meta">
+          <div><b>Date:</b> <%= (dateLabel || new Date().toLocaleDateString('en-GB')) %></div>
+          <div><b>Printed:</b> <%= new Date().toLocaleString('en-GB') %></div>
+        </div>
+      </div>
+
       <div class="no-print" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px;">
         <a class="btn-human btn-primary"
            href="/reports/daily/export.xlsx<%= dateISO ? ('?date=' + encodeURIComponent(dateISO)) : '' %>">
           ⬇️ Export Excel
         </a>
 
-        <a class="btn-human"
-           href="/reports/daily">
-          Reset
-        </a>
+        <button class="btn-human btn-primary" type="button" id="printReportBtn">
+          🖨️ Print Report
+        </button>
+
+        <a class="btn-human" href="/reports/daily">Reset</a>
       </div>
 
-      <!-- FILTER OPTIONS -->
       <form class="filter-row no-print" method="get" action="/reports/daily">
         <div>
           <label>Filter</label>
@@ -111,101 +323,134 @@
         </div>
       </form>
 
-      <div class="no-print" style="margin-bottom:12px;color:#374151">
-        Date: <%= (dateLabel || new Date().toLocaleDateString()) %>
+      <div id="print-area">
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Date</div>
+            <div class="stat-value" style="font-size:18px;"><%= (dateLabel || new Date().toLocaleDateString('en-GB')) %></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Sales</div>
+            <div class="stat-value">$<%= (total || 0).toFixed(2) %></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Invoice Lines</div>
+            <div class="stat-value"><%= (rows || []).length %></div>
+          </div>
+        </div>
+
+        <div class="report-section">
+          <h3>Summary by Category</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th class="money">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (grouped || []).forEach(function(g){ %>
+                <tr>
+                  <td><%= (g.category || '').replaceAll('_',' ') %></td>
+                  <td><%= g.qty %></td>
+                  <td class="money">$<%= (g.total || 0).toFixed(2) %></td>
+                </tr>
+              <% }) %>
+              <% if(!grouped || grouped.length === 0){ %>
+                <tr><td colspan="3">No sales for this day.</td></tr>
+              <% } %>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2" style="text-align:right;font-weight:900">Total Sales</td>
+                <td class="money" style="font-weight:900">$<%= (total || 0).toFixed(2) %></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="report-section">
+          <h3>Invoice Lines</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Category</th>
+                <th style="text-align:center">Qty</th>
+                <th class="money">Price</th>
+                <th class="money">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% (rows || []).forEach(function(r){ %>
+                <tr>
+                  <td><%= r.invoiceNumber != null ? r.invoiceNumber : '-' %></td>
+                  <td><%= (r.category || '').replaceAll('_',' ') %></td>
+                  <td style="text-align:center"><%= r.qty || 0 %></td>
+                  <td class="money">$<%= (r.price || 0).toFixed(2) %></td>
+                  <td class="money">$<%= (r.total || 0).toFixed(2) %></td>
+                </tr>
+              <% }) %>
+              <% if(!rows || rows.length === 0){ %>
+                <tr><td colspan="5">No invoice lines.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="report-footer">
+          San Stephano Daily Access — Daily Report
+        </div>
       </div>
-
-      <h3>Summary by Category</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Quantity</th>
-            <th style="text-align:right">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% (grouped || []).forEach(function(g){ %>
-            <tr>
-              <td><%= (g.category || '').replaceAll('_',' ') %></td>
-              <td><%= g.qty %></td>
-              <td style="text-align:right">$<%= (g.total||0).toFixed(2) %></td>
-            </tr>
-          <% }) %>
-          <% if(!grouped || grouped.length === 0){ %>
-            <tr><td colspan="3">No sales for this day.</td></tr>
-          <% } %>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="2" style="text-align:right;font-weight:900">Total Sales</td>
-            <td style="text-align:right;font-weight:900">$<%= (total||0).toFixed(2) %></td>
-          </tr>
-        </tfoot>
-      </table>
-
-      <h3 style="margin-top:16px">Invoice Lines</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Invoice #</th>
-            <th>Category</th>
-            <th style="text-align:center">Qty</th>
-            <th style="text-align:right">Price</th>
-            <th style="text-align:right">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% (rows || []).forEach(function(r){ %>
-            <tr>
-              <td><%= r.invoiceNumber != null ? r.invoiceNumber : '-' %></td>
-              <td><%= (r.category || '').replaceAll('_',' ') %></td>
-              <td style="text-align:center"><%= r.qty || 0 %></td>
-              <td style="text-align:right">$<%= (r.price || 0).toFixed(2) %></td>
-              <td style="text-align:right">$<%= (r.total || 0).toFixed(2) %></td>
-            </tr>
-          <% }) %>
-          <% if(!rows || rows.length === 0){ %>
-            <tr><td colspan="5">No invoice lines.</td></tr>
-          <% } %>
-        </tbody>
-      </table>
 
     </div>
   </div>
 
   <script>
-    function toISODate(d){
+    function toISODate(d) {
       const x = new Date(d);
       const yyyy = x.getFullYear();
-      const mm = String(x.getMonth()+1).padStart(2,'0');
-      const dd = String(x.getDate()).padStart(2,'0');
+      const mm = String(x.getMonth() + 1).padStart(2, '0');
+      const dd = String(x.getDate()).padStart(2, '0');
       return `${yyyy}-${mm}-${dd}`;
     }
 
     const preset = document.getElementById('dailyPreset');
     const dateInput = document.getElementById('dailyDate');
 
-    function applyPreset(val){
+    function applyPreset(val) {
       const now = new Date();
-      if(val === 'today'){
+      if (val === 'today') {
         dateInput.value = toISODate(now);
-      } else if(val === 'yesterday'){
+      } else if (val === 'yesterday') {
         const y = new Date(now);
         y.setDate(y.getDate() - 1);
         dateInput.value = toISODate(y);
       }
     }
 
-    preset.addEventListener('change', (e)=> applyPreset(e.target.value));
+    if (preset && dateInput) {
+      preset.addEventListener('change', (e) => applyPreset(e.target.value));
 
-    if(dateInput.value){
-      preset.value = 'custom';
-    } else {
-      preset.value = 'today';
-      applyPreset('today');
+      if (dateInput.value) {
+        preset.value = 'custom';
+      } else {
+        preset.value = 'today';
+        applyPreset('today');
+      }
     }
   </script>
+
   <%- include('partials/footer') %>
+
+  <script>
+    const printBtn = document.getElementById('printReportBtn');
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+  </script>
 </body>
 </html>

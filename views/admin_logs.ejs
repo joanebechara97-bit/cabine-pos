@@ -48,7 +48,7 @@
 
         <% (logs || []).forEach(l => { %>
           <tr>
-            <td><%= l.createdAt ? new Date(l.createdAt).toLocaleString() : '' %></td>
+            <td><%= l.createdAt ? new Date(l.createdAt).toLocaleString('en-GB') : '' %></td>
             <td><%= l.actorName || '-' %></td>
             <td><span class="badge"><%= l.action %></span></td>
             <td style="white-space:pre-wrap;"><%= l.details || '' %></td>

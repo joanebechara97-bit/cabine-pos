@@ -7,56 +7,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    .dropdown{
-      position:relative;
-      display:inline-flex;
-      align-items:center;
-    }
+.dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 1000;
+}
 
-    .dropdown-toggle{
-      border:none;
-      cursor:pointer;
-      padding:10px 14px;
-      border-radius:12px;
-      font-weight:800;
-      font-size:14px;
-      color:#fff;
-      background:linear-gradient(135deg,#1d4ed8,#3b82f6);
-      box-shadow:0 10px 20px rgba(37,99,235,.18);
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
+.dropdown-toggle {
+  position: relative;
+  z-index: 1001;
+  cursor: pointer;
+}
 
-    .dropdown-menu{
-      display:none;
-      position:absolute;
-      top:calc(100% + 10px);
-      right:0;
-      min-width:200px;
-      background:#fff;
-      border:1px solid #e5eaf2;
-      border-radius:14px;
-      box-shadow:0 14px 40px rgba(15,23,42,.12);
-      overflow:hidden;
-      z-index:9999;
-    }
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 8px;
+  z-index: 1002;
+}
 
-    .dropdown.show .dropdown-menu{
-      display:block;
-    }
+.dropdown-menu.show {
+  display: block;
+}
 
-    .dropdown-menu a{
-      display:block;
-      padding:12px 14px;
-      text-decoration:none;
-      color:#0f172a;
-      font-weight:700;
-    }
+.dropdown-menu a {
+  display: block;
+  padding: 10px 12px;
+  text-decoration: none;
+  color: #0f172a;
+  border-radius: 8px;
+}
 
-    .dropdown-menu a:hover{
-      background:#f1f5f9;
-    }
+.dropdown-menu a:hover {
+  background: #f3f6fb;
+}
 
     .btn.logout-btn{
       padding:10px 14px;
@@ -514,20 +505,23 @@
 <button id="open-day-btn" onclick="openDay()" class="btn logout-btn">🟢 Open Day</button>
 <button id="close-day-btn" onclick="closeDay()" class="btn logout-btn">🔴 Close Day</button>
 
-  <div class="dropdown" id="reportsDropdown">
-            <button type="button" class="dropdown-toggle">📊 Reports ▾</button>
-            <div class="dropdown-menu">
-              <a href="/reports/daily">Daily report</a>
+<div class="dropdown" id="reportsDropdown">
+  <button type="button" class="dropdown-toggle" id="reportsToggle">
+    📊 Reports ▾
+  </button>
 
-              <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canViewMonthlyReport))) { %>
-                <a href="/reports/monthly">Monthly report</a>
-              <% } %>
+  <div class="dropdown-menu" id="reportsMenu">
+    <a href="/reports/daily">Daily report</a>
 
-              <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canRefundInvoice))) { %>
-                <a href="/reports/voided">Voided invoices</a>
-              <% } %>
-            </div>
-          </div>
+    <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canViewMonthlyReport))) { %>
+      <a href="/reports/monthly">Monthly report</a>
+    <% } %>
+
+    <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canRefundInvoice))) { %>
+      <a href="/reports/voided">Voided invoices</a>
+    <% } %>
+  </div>
+</div>
 
           <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canRefundInvoice))) { %>
             <a class="btn logout-btn" href="/refund">Void / Refund</a>
@@ -570,7 +564,21 @@
           <div class="info-label">My Sales Today</div>
           <div class="info-value" id="my-daily-revenue">$0.00</div>
         </div>
+<div class="info-card">
+  <div class="info-label">Shift Started</div>
+  <div class="info-value" id="shift-started-value">
+    <% if (sessionData && sessionData.openedAt) { %>
+      <%= new Date(sessionData.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+    <% } else { %>
+      --
+    <% } %>
+  </div>
+</div>
 
+<div class="info-card">
+  <div class="info-label">Shift Duration</div>
+  <div class="info-value" id="shift-duration-value">--</div>
+</div>
         <div class="info-card">
           <div class="info-label">My Invoices Today</div>
           <div class="info-value" id="my-daily-invoices">0</div>
@@ -942,7 +950,223 @@ async function openDay() {
     alert('Failed to open day');
   }
 }
+function updateShiftTimer() {
+  const durationEl = document.getElementById('shift-duration-value');
+  if (!durationEl) return;
 
+  const rawEl = document.getElementById('shift-opened-at-data');
+  if (!rawEl) {
+    durationEl.textContent = '--';
+    return;
+  }
+
+  const openedAtRaw = JSON.parse(rawEl.textContent);
+
+  if (!openedAtRaw) {
+    durationEl.textContent = '--';
+    return;
+  }
+
+  const openedAt = new Date(openedAtRaw);
+  if (isNaN(openedAt.getTime())) {
+    durationEl.textContent = '--';
+    return;
+  }
+
+  const now = new Date();
+  const diffMs = Math.max(0, now - openedAt);
+
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  durationEl.textContent = `${hours}h ${minutes}m`;
+}
+function printVoidedReceipt(order, voidReason) {
+  const win = window.open('', '_blank', 'width=380,height=700');
+
+  if (!win) {
+    alert('Popup blocked. Please allow popups to print void receipt.');
+    return;
+  }
+
+  const now = new Date();
+  const logoUrl = window.location.origin + '/assets/logo-ss-png.png';
+
+  const itemsHtml = (order.items || []).map(item => {
+    const qty = Number(item.qty || 0);
+    const lineTotal = Number(
+      item.total != null
+        ? item.total
+        : (Number(item.price || 0) * qty)
+    );
+
+    return `
+      <div class="row">
+        <span>${item.category || item.name || 'Item'} x${qty}</span>
+        <span>$${lineTotal.toFixed(2)}</span>
+      </div>
+    `;
+  }).join('');
+
+  const subtotal = Number(order.subtotal || 0);
+  const discountAmount = Number(order.discountAmount || 0);
+  const calculatedTotal = (order.items || []).reduce((sum, item) => {
+    return sum + Number((item.qty || 0) * (item.price || 0));
+  }, 0);
+  const finalTotal = calculatedTotal;
+
+  win.document.open();
+  win.document.write(`
+    <html>
+      <head>
+        <title>Voided Receipt</title>
+        <style>
+          @page { size: 80mm auto; margin: 0; }
+
+          body {
+            margin: 0;
+            padding: 8px;
+            font-family: Arial, sans-serif;
+            color: #000;
+            width: 72mm;
+            font-size: 12px;
+          }
+
+          .center { text-align: center; }
+          .bold { font-weight: 700; }
+          .small { font-size: 11px; }
+          .big { font-size: 18px; font-weight: 800; }
+
+          .line {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+          }
+
+          .header-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+          }
+
+          .header-info {
+            text-align: center;
+            font-size: 11px;
+            margin-bottom: 6px;
+          }
+
+          .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 5px 0;
+          }
+
+          .void-box {
+            border: 2px solid #000;
+            padding: 6px;
+            margin: 8px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 1px;
+          }
+
+          .muted {
+            font-size: 11px;
+          }
+
+          .total-main {
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          .cut-space {
+            height: 24px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header-title">San Stephano Daily Access</div>
+        <div class="header-info">VOID / REFUND RECEIPT</div>
+
+        <div class="void-box">VOIDED RECEIPT</div>
+
+        <div class="row">
+          <span>Invoice #</span>
+          <span class="bold">${order.invoiceNumber != null ? order.invoiceNumber : 'N/A'}</span>
+        </div>
+
+        <div class="row">
+          <span>Status</span>
+          <span class="bold">VOIDED</span>
+        </div>
+
+        <div class="row">
+          <span>Date</span>
+          <span class="bold">${now.toLocaleDateString('en-GB')}</span>
+        </div>
+
+        <div class="row">
+          <span>Time</span>
+          <span class="bold">${now.toLocaleTimeString('en-GB')}</span>
+        </div>
+
+        <div class="row">
+          <span>Voided By</span>
+          <span class="bold">${order.voidedByName || '-'}</span>
+        </div>
+
+        <div class="line"></div>
+
+        ${itemsHtml || '<div class="center muted">No items found</div>'}
+
+        <div class="line"></div>
+
+        <div class="row">
+          <span>Subtotal</span>
+          <span class="bold">$${subtotal.toFixed(2)}</span>
+        </div>
+
+        <div class="row">
+          <span>Discount</span>
+          <span class="bold">-$${discountAmount.toFixed(2)}</span>
+        </div>
+
+        <div class="row">
+          <span class="total-main">Total</span>
+          <span class="total-main">$ ${ Number(((order?.items || []).reduce((sum, item) => {
+  return sum + Number((item.qty || 0) * (item.price || 0));
+}, 0))).toFixed(2) }</span>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="center bold">VOID REASON</div>
+        <div class="center muted">${voidReason ? String(voidReason) : 'No reason provided'}</div>
+
+        <div class="line"></div>
+
+        <div class="center big">THIS RECEIPT IS VOID</div>
+        <div class="center small">San Stephano Resort</div>
+        <div class="center small">Batroun - Lebanon</div>
+
+        <div class="cut-space"></div>
+
+        <script>
+          window.onload = function () {
+            setTimeout(function () {
+              window.focus();
+              window.print();
+            }, 500);
+          };
+        <\/script>
+      </body>
+    </html>
+  `);
+  win.document.close();
+}
 async function closeDay() {
   try {
     const statsRes = await fetch('/api/stats/my-daily-sales', {
@@ -1031,13 +1255,14 @@ async function loadMyDailySales() {
     });
 
     const data = await res.json();
+    console.log('loadMyDailySales API response:', data);
 
     if (!res.ok) {
       throw new Error(data.error || 'Failed to load sales');
     }
 
-    const salesBox = document.getElementById('my-sales-today');
-    const invoicesBox = document.getElementById('my-invoices-today');
+    const salesBox = document.getElementById('my-daily-revenue');
+    const invoicesBox = document.getElementById('my-daily-invoices');
 
     if (salesBox) {
       salesBox.textContent = '$' + Number(data.revenue || 0).toFixed(2);
@@ -1046,6 +1271,7 @@ async function loadMyDailySales() {
     if (invoicesBox) {
       invoicesBox.textContent = String(Number(data.invoices || 0));
     }
+
   } catch (e) {
     console.error('loadMyDailySales error:', e);
   }
@@ -1132,7 +1358,7 @@ async function confirmOrder() {
 }
 function printDailySalesReport(data) {
   const now = new Date();
-  const win = window.open('', '_blank', 'width=380,height=700');
+  const win = window.open('', '_blank', 'width=380,height=850');
 
   if (!win) {
     alert('Popup blocked. Please allow popups to print the closing report.');
@@ -1142,6 +1368,13 @@ function printDailySalesReport(data) {
   const cashierName = `<%= user ? (user.username || user.name || user.email || 'Unknown') : 'Unknown' %>`;
   const logoUrl = window.location.origin + '/assets/logo-ss-png.png';
 
+  const breakdownRows = (data.breakdown || []).map(item => `
+    <div class="row">
+      <span>${item.category} (${Number(item.qty || 0)})</span>
+      <span class="value">$${Number(item.total || 0).toFixed(2)}</span>
+    </div>
+  `).join('');
+
   win.document.open();
   win.document.write(`
     <html>
@@ -1149,6 +1382,7 @@ function printDailySalesReport(data) {
         <title>Daily Closing Report</title>
         <style>
           @page { size: 80mm auto; margin: 0; }
+
           body {
             margin: 0;
             padding: 8px;
@@ -1157,14 +1391,39 @@ function printDailySalesReport(data) {
             width: 72mm;
             font-size: 12px;
           }
+
           .center { text-align: center; }
           .bold { font-weight: 700; }
           .line { border-top: 1px dashed #000; margin: 8px 0; }
-          .logo-wrap { text-align: center; margin-bottom: 6px; }
-          .logo-wrap img { max-width: 52mm; max-height: 45px; object-fit: contain; }
-          .row { display: flex; justify-content: space-between; margin: 6px 0; }
+
+          .logo-wrap {
+            text-align: center;
+            margin-bottom: 10px;
+          }
+
+          .logo-wrap img {
+  width: 55mm;
+  height: auto;
+  margin-bottom: 6px;
+  object-fit: contain;
+}
+
+          .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 6px 0;
+          }
+
           .value { font-weight: 700; }
           .big { font-size: 16px; font-weight: 800; }
+
+          .section-title {
+            margin-top: 10px;
+            font-weight: 800;
+            text-align: center;
+          }
+
           .cut-space { height: 24px; }
         </style>
       </head>
@@ -1185,12 +1444,12 @@ function printDailySalesReport(data) {
 
         <div class="row">
           <span>Date</span>
-          <span class="value">${now.toLocaleDateString()}</span>
+          <span class="value">${now.toLocaleDateString('en-GB')}</span>
         </div>
 
         <div class="row">
           <span>Time</span>
-          <span class="value">${now.toLocaleTimeString()}</span>
+          <span class="value">${now.toLocaleTimeString('en-GB')}</span>
         </div>
 
         <div class="line"></div>
@@ -1204,6 +1463,12 @@ function printDailySalesReport(data) {
           <span>Sales Today</span>
           <span class="value big">$${Number(data.revenue || 0).toFixed(2)}</span>
         </div>
+
+        <div class="line"></div>
+
+        <div class="section-title">CASHIER SALES BREAKDOWN</div>
+
+        ${breakdownRows || '<div class="center">No sales found</div>'}
 
         <div class="line"></div>
 
@@ -1223,6 +1488,7 @@ function printDailySalesReport(data) {
   `);
   win.document.close();
 }
+
 function printReceipt(items, confirmedOrder, discount) {
   const now = new Date();
   const win = window.open('', '_blank', 'width=380,height=900');
@@ -1300,6 +1566,7 @@ function printReceipt(items, confirmedOrder, discount) {
 
           .center { text-align: center; }
           .bold { font-weight: 700; }
+          .small { font-size: 11px; }
 
           .line {
             border-top: 1px dashed #000;
@@ -1308,13 +1575,26 @@ function printReceipt(items, confirmedOrder, discount) {
 
           .logo-wrap {
             text-align: center;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
+          }
+.logo-wrap img {
+  width: 55mm;
+  height: auto;
+  margin-bottom: 6px;
+  object-fit: contain;
+}
+
+          .header-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
           }
 
-          .logo-wrap img {
-            max-width: 52mm;
-            max-height: 45px;
-            object-fit: contain;
+          .header-info {
+            text-align: center;
+            font-size: 11px;
+            margin-bottom: 6px;
           }
 
           table {
@@ -1345,8 +1625,8 @@ function printReceipt(items, confirmedOrder, discount) {
             font-weight: 700;
           }
 
-          .small {
-            font-size: 11px;
+          .total-main {
+            font-size: 13px;
           }
 
           .qr-section {
@@ -1394,15 +1674,15 @@ function printReceipt(items, confirmedOrder, discount) {
           <img src="${logoUrl}" alt="San Stephano Logo" />
         </div>
 
-        <div class="center bold">San Stephano Daily Access</div>
-        <div class="center small">Batroun</div>
+        <div class="header-title">San Stephano Daily Access</div>
+        <div class="header-info">Batroun</div>
 
         <div class="line"></div>
 
         <div>Invoice: <span class="right">${invoiceNo}</span></div>
         <div>Cashier: <span class="right">${cashierName}</span></div>
-        <div>Date: <span class="right">${now.toLocaleDateString()}</span></div>
-        <div>Time: <span class="right">${now.toLocaleTimeString()}</span></div>
+        <div>Date: <span class="right">${now.toLocaleDateString('en-GB')}</span></div>
+        <div>Time: <span class="right">${now.toLocaleTimeString('en-GB')}</span></div>
 
         <div class="line"></div>
 
@@ -1421,14 +1701,16 @@ function printReceipt(items, confirmedOrder, discount) {
           </tr>
           ${discountRow}
           <tr>
-            <td>TOTAL</td>
-            <td style="text-align:right">$${finalTotal.toFixed(2)}</td>
+            <td class="total-main">TOTAL</td>
+            <td class="total-main" style="text-align:right">$${finalTotal.toFixed(2)}</td>
           </tr>
         </table>
 
         <div class="line"></div>
 
         <div class="center small">Thank you</div>
+        <div class="center small">San Stephano Resort</div>
+        <div class="center small">Batroun - Lebanon</div>
 
         <div class="line"></div>
 
@@ -1458,21 +1740,6 @@ function printReceipt(items, confirmedOrder, discount) {
   `);
   win.document.close();
 }
-
-    const dd = document.getElementById('reportsDropdown');
-    if (dd) {
-      const ddBtn = dd.querySelector('.dropdown-toggle');
-      if (ddBtn) {
-        ddBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          dd.classList.toggle('show');
-        });
-      }
-
-      document.addEventListener('click', () => {
-        dd.classList.remove('show');
-      });
-    }
 function newCustomer() {
 
   cart = [];
@@ -1539,12 +1806,31 @@ function newCustomer() {
       });
     }
 
- renderCart();
+renderCart();
 loadMyDailySales();
 updateDiscountSymbol();
 updateSessionButtons();
 loadLastReceipt();
+updateShiftTimer();
+setInterval(updateShiftTimer, 60000);
   </script>
   <%- include('partials/footer') %>
+
+  <script>
+    const reportsToggle = document.getElementById('reportsToggle');
+    const reportsMenu = document.getElementById('reportsMenu');
+
+    if (reportsToggle && reportsMenu) {
+      reportsToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        console.log('reports clicked');
+        reportsMenu.classList.toggle('show');
+      });
+
+      document.addEventListener('click', function () {
+        reportsMenu.classList.remove('show');
+      });
+    }
+  </script>
 </body>
 </html>

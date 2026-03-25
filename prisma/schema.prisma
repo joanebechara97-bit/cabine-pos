@@ -7,10 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Business {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  users           User[]
+  items           Item[]
+  orders          Order[]
+  invoiceCounters InvoiceCounter[]
+  auditLogs       AuditLog[]
+  licenses        License[]
+}
+
 model Order {
-  id             Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
   status         String    @default("DRAFT")
-  invoiceNumber  Int?      @unique
+  invoiceNumber  Int?
   confirmedAt    DateTime?
   createdAt      DateTime  @default(now())
   voidedAt       DateTime?
@@ -32,16 +48,25 @@ model Order {
   discountAmount Float  @default(0)
 
   items OrderItem[]
+
+  @@index([businessId])
+  @@unique([businessId, invoiceNumber])
 }
 
 model Item {
-  id        String   @id @default(cuid())
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
   name      String
   price     Float
   type      String   @default("service")
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([businessId])
+  @@unique([businessId, name])
 }
 
 model OrderItem {
@@ -55,13 +80,19 @@ model OrderItem {
 }
 
 model InvoiceCounter {
-  id     Int @id @default(1)
+  id         Int      @id @default(autoincrement())
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
   lastNo Int @default(0)
 }
 
 model User {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique
+  id         Int      @id @default(autoincrement())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  username        String
   passwordHash    String
   role            String   @default("FRONT_DESK")
   permissionsJson String   @default("{}")
@@ -69,10 +100,16 @@ model User {
   createdAt       DateTime @default(now())
 
   orders Order[] @relation("UserOrders")
+
+  @@index([businessId])
+  @@unique([businessId, username])
 }
 
 model AuditLog {
-  id        Int      @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   actorId   Int?
   actorName String?
@@ -80,6 +117,7 @@ model AuditLog {
   details   String?
 
   @@index([createdAt])
+  @@index([businessId])
 }
 
 model user_sessions {
@@ -89,11 +127,17 @@ model user_sessions {
 
   @@index([expire], map: "IDX_session_expire")
 }
+
 model License {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  business  String?
-  expiresAt DateTime?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id           Int       @id @default(autoincrement())
+  key          String    @unique
+  businessId   String?
+  business     Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  businessName String?   @map("business")
+  label        String?
+  expiresAt    DateTime?
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  @@index([businessId])
 }

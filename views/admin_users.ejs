@@ -33,6 +33,7 @@
         <tr>
           <th>Username</th>
           <th>Role</th>
+          <th>Access</th>
           <th>Status</th>
           <th>Created</th>
           <th style="min-width:280px;">Actions</th>
@@ -44,13 +45,20 @@
             <td><%= u.username %></td>
             <td><%= u.role %></td>
             <td>
+              <% if (u.role === 'ADMIN') { %>
+                <span class="badge on">Full Access</span>
+              <% } else { %>
+                <span class="badge">Custom Permissions</span>
+              <% } %>
+            </td>
+            <td>
               <% if (u.isActive) { %>
                 <span class="badge on">Active</span>
               <% } else { %>
                 <span class="badge off">Inactive</span>
               <% } %>
             </td>
-            <td><%= u.createdAt ? new Date(u.createdAt).toLocaleString() : '' %></td>
+            <td><%= u.createdAt ? new Date(u.createdAt).toLocaleString('en-GB') : '' %></td>
             <td style="display:flex; gap:8px; flex-wrap:wrap;">
               <a class="btn" href="/admin/users/<%= u.id %>/edit">Edit</a>
 

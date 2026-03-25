@@ -52,40 +52,12 @@
         <div id="permsBox" style="border:1px solid #e5eaf2; border-radius:12px; padding:12px;">
           <div style="font-weight:900; margin-bottom:10px;">Permissions (FRONT_DESK)</div>
 
-          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-            <input type="checkbox" name="canAccessPOS" <%= p.canAccessPOS ? 'checked' : '' %> />
-            <span>Can access POS</span>
-          </label>
-
-          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-            <input type="checkbox" name="canConfirmOrder" <%= p.canConfirmOrder ? 'checked' : '' %> />
-            <span>Can confirm order</span>
-          </label>
-
-          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-            <input type="checkbox" name="canNewCustomer" <%= p.canNewCustomer ? 'checked' : '' %> />
-            <span>Can create new customer</span>
-          </label>
-
-          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-            <input type="checkbox" name="canViewDailyReport" <%= p.canViewDailyReport ? 'checked' : '' %> />
-            <span>Can view daily report</span>
-          </label>
-
-          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-            <input type="checkbox" name="canViewMonthlyReport" <%= p.canViewMonthlyReport ? 'checked' : '' %> />
-            <span>Can view monthly report</span>
-          </label>
-
-          <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-            <input type="checkbox" name="canPrintReports" <%= p.canPrintReports ? 'checked' : '' %> />
-            <span>Can print reports</span>
-          </label>
-
-          <label style="display:flex; gap:10px; align-items:center;">
-            <input type="checkbox" name="canRefundInvoice" <%= p.canRefundInvoice ? 'checked' : '' %> />
-            <span>Can Void / Refund Invoice</span>
-          </label>
+          <% Object.keys(permissionLabels || {}).forEach(function(key) { %>
+            <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+              <input type="checkbox" name="<%= key %>" <%= p[key] ? 'checked' : '' %> />
+              <span><%= permissionLabels[key] %></span>
+            </label>
+          <% }) %>
         </div>
 
         <button class="btn logout-btn" type="submit" style="justify-self:start;">Create</button>
@@ -98,8 +70,8 @@
   const roleSelect = document.getElementById('roleSelect');
   const permsBox = document.getElementById('permsBox');
 
-  function togglePerms(){
-    permsBox.style.display = (roleSelect.value === 'FRONT_DESK') ? 'block' : 'none';
+  function togglePerms() {
+    permsBox.style.display = roleSelect.value === 'FRONT_DESK' ? 'block' : 'none';
   }
 
   roleSelect.addEventListener('change', togglePerms);
