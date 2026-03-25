@@ -22,8 +22,7 @@
     <% } %>
 
     <form method="POST" action="/admin/users">
-      <div style="display:grid; gap:10px; max-width:520px;">
-
+      <div style="display:grid; gap:14px; max-width:720px;">
         <label>
           <div style="font-weight:800; margin-bottom:6px;">Username</div>
           <input name="username" value="<%= (form && form.username) || '' %>" required />
@@ -42,22 +41,24 @@
           </select>
         </label>
 
-        <label style="display:flex; align-items:center; gap:10px;">
+        <label class="checkbox-inline">
           <input type="checkbox" name="isActive" <%= (!form || form.isActive) ? 'checked' : '' %> />
-          <span style="font-weight:800;">Active</span>
+          <span>Active</span>
         </label>
 
         <% const p = (form && form.perms) || {}; %>
 
-        <div id="permsBox" style="border:1px solid #e5eaf2; border-radius:12px; padding:12px;">
-          <div style="font-weight:900; margin-bottom:10px;">Permissions (FRONT_DESK)</div>
+        <div id="permsBox" class="permissions-card">
+          <div class="permissions-title">Permissions (FRONT_DESK)</div>
 
-          <% Object.keys(permissionLabels || {}).forEach(function(key) { %>
-            <label style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-              <input type="checkbox" name="<%= key %>" <%= p[key] ? 'checked' : '' %> />
-              <span><%= permissionLabels[key] %></span>
-            </label>
-          <% }) %>
+          <div class="permissions-grid">
+            <% Object.keys(permissionLabels || {}).forEach(function(key) { %>
+              <label class="perm-row">
+                <input type="checkbox" name="<%= key %>" <%= p[key] ? 'checked' : '' %> />
+                <span><%= permissionLabels[key] %></span>
+              </label>
+            <% }) %>
+          </div>
         </div>
 
         <button class="btn logout-btn" type="submit" style="justify-self:start;">Create</button>
