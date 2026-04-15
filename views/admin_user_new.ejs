@@ -7,77 +7,108 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-<div class="site">
-  <header class="app-header">
-    <div class="app-title">Create User</div>
-    <div class="app-actions">
-      <a class="btn logout-btn" href="/admin/users">Back</a>
-      <a class="btn logout-btn" href="/admin">Admin</a>
-    </div>
-  </header>
-
-  <div class="card" style="margin:16px;">
-    <% if (error) { %>
-      <p style="color:#b91c1c; font-weight:800;"><%= error %></p>
-    <% } %>
-
-    <form method="POST" action="/admin/users">
-      <div style="display:grid; gap:14px; max-width:720px;">
-        <label>
-          <div style="font-weight:800; margin-bottom:6px;">Username</div>
-          <input name="username" value="<%= (form && form.username) || '' %>" required />
-        </label>
-
-        <label>
-          <div style="font-weight:800; margin-bottom:6px;">Password</div>
-          <input type="password" name="password" required />
-        </label>
-
-        <label>
-          <div style="font-weight:800; margin-bottom:6px;">Role</div>
-          <select name="role" id="roleSelect">
-            <option value="FRONT_DESK" <%= (form && form.role) === 'FRONT_DESK' ? 'selected' : '' %>>FRONT_DESK</option>
-            <option value="ADMIN" <%= (form && form.role) === 'ADMIN' ? 'selected' : '' %>>ADMIN</option>
-          </select>
-        </label>
-
-        <label class="checkbox-inline">
-          <input type="checkbox" name="isActive" <%= (!form || form.isActive) ? 'checked' : '' %> />
-          <span>Active</span>
-        </label>
-
-        <% const p = (form && form.perms) || {}; %>
-
-        <div id="permsBox" class="permissions-card">
-          <div class="permissions-title">Permissions (FRONT_DESK)</div>
-
-          <div class="permissions-grid">
-            <% Object.keys(permissionLabels || {}).forEach(function(key) { %>
-              <label class="perm-row">
-                <input type="checkbox" name="<%= key %>" <%= p[key] ? 'checked' : '' %> />
-                <span><%= permissionLabels[key] %></span>
-              </label>
-            <% }) %>
-          </div>
-        </div>
-
-        <button class="btn logout-btn" type="submit" style="justify-self:start;">Create</button>
+  <div class="site">
+    <header class="app-header">
+      <div class="app-title">Create User</div>
+      <div class="app-actions">
+        <a class="btn logout-btn" href="/admin/users">Back</a>
+        <a class="btn logout-btn" href="/admin">Admin</a>
       </div>
-    </form>
+    </header>
+
+    <div class="card" style="margin:16px;">
+      <% if (error) { %>
+        <p style="color:#b91c1c; font-weight:800;"><%= error %></p>
+      <% } %>
+
+      <% const p = (form && form.perms) || {}; %>
+
+      <form method="POST" action="/admin/users">
+        <div style="display:grid; gap:14px; max-width:720px;">
+
+          <label>
+            <div style="font-weight:800; margin-bottom:6px;">Name</div>
+            <input
+              type="text"
+              name="name"
+              value="<%= (form && form.name) || '' %>"
+              required
+            />
+          </label>
+
+          <label>
+            <div style="font-weight:800; margin-bottom:6px;">Email</div>
+            <input
+              type="email"
+              name="email"
+              value="<%= (form && form.email) || '' %>"
+              required
+            />
+          </label>
+
+          <label>
+            <div style="font-weight:800; margin-bottom:6px;">Password</div>
+            <input type="password" name="password" required />
+          </label>
+
+          <label>
+            <div style="font-weight:800; margin-bottom:6px;">Role</div>
+            <select name="role" id="roleSelect">
+              <option value="FRONT_DESK" <%= (form && form.role) === 'FRONT_DESK' ? 'selected' : '' %>>
+                FRONT_DESK
+              </option>
+              <option value="ADMIN" <%= (form && form.role) === 'ADMIN' ? 'selected' : '' %>>
+                ADMIN
+              </option>
+            </select>
+          </label>
+
+          <label class="checkbox-inline">
+            <input
+              type="checkbox"
+              name="isActive"
+              <%= (!form || form.isActive) ? 'checked' : '' %>
+            />
+            <span>Active</span>
+          </label>
+
+          <div id="permsBox" class="permissions-card">
+            <div class="permissions-title">Permissions (FRONT_DESK)</div>
+
+            <div class="permissions-grid">
+              <% Object.keys(permissionLabels || {}).forEach(function(key) { %>
+                <label class="perm-row">
+                  <input
+                    type="checkbox"
+                    name="<%= key %>"
+                    <%= p[key] ? 'checked' : '' %>
+                  />
+                  <span><%= permissionLabels[key] %></span>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+
+          <button class="btn logout-btn" type="submit" style="justify-self:start;">
+            Create
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<script>
-  const roleSelect = document.getElementById('roleSelect');
-  const permsBox = document.getElementById('permsBox');
+  <script>
+    const roleSelect = document.getElementById('roleSelect');
+    const permsBox = document.getElementById('permsBox');
 
-  function togglePerms() {
-    permsBox.style.display = roleSelect.value === 'FRONT_DESK' ? 'block' : 'none';
-  }
+    function togglePerms() {
+      permsBox.style.display = roleSelect.value === 'FRONT_DESK' ? 'block' : 'none';
+    }
 
-  roleSelect.addEventListener('change', togglePerms);
-  togglePerms();
-</script>
-<%- include('partials/footer') %>
+    roleSelect.addEventListener('change', togglePerms);
+    togglePerms();
+  </script>
+
+  <%- include('partials/footer') %>
 </body>
 </html>

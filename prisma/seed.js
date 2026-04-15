@@ -26,7 +26,6 @@ async function main() {
     },
   });
 
-  console.log('Seeded: InvoiceCounter + admin user');
 }
 
 main()

@@ -513,23 +513,23 @@
   <div class="dropdown-menu" id="reportsMenu">
     <a href="/reports/daily">Daily report</a>
 
-    <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canViewMonthlyReport))) { %>
+    <% if (user && user.perms && user.perms.canViewMonthlyReport) { %>
       <a href="/reports/monthly">Monthly report</a>
     <% } %>
 
-    <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canRefundInvoice))) { %>
-      <a href="/reports/voided">Voided invoices</a>
+<% if (user && user.perms && user.perms.canRefundInvoice) { %>
+        <a href="/reports/voided">Voided invoices</a>
     <% } %>
   </div>
 </div>
 
-          <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canRefundInvoice))) { %>
-            <a class="btn logout-btn" href="/refund">Void / Refund</a>
+<% if (user && user.perms && user.perms.canRefundInvoice) { %>
+              <a class="btn logout-btn" href="/refund">Void / Refund</a>
           <% } %>
 
-          <% if (user && user.role === 'ADMIN') { %>
-            <a class="btn logout-btn" href="/admin">Admin</a>
-          <% } %>
+          <% if (user && user.perms && user.perms.canManageSettings) { %>
+  <a class="btn logout-btn" href="/admin">Admin</a>
+<% } %>
 
           <a class="btn logout-btn" href="/logout">Log out</a>
         </div>
@@ -634,8 +634,8 @@
             </tfoot>
           </table>
 
-                  <% if (user && (user.role === 'ADMIN' || (user.perms && user.perms.canApplyDiscount))) { %>
-        <div class="discount-box">
+<% if (user && user.perms && user.perms.canApplyDiscount) { %>
+          <div class="discount-box">
   <label for="discount-value">Discount</label>
 
   <div class="discount-top">
@@ -934,7 +934,6 @@ async function openDay() {
     });
 
     const data = await res.json().catch(() => ({}));
-    console.log('open day response:', res.status, data);
 
     if (!res.ok) {
       alert(data.error || ('Failed to open day (' + res.status + ')'));
@@ -1255,7 +1254,6 @@ async function loadMyDailySales() {
     });
 
     const data = await res.json();
-    console.log('loadMyDailySales API response:', data);
 
     if (!res.ok) {
       throw new Error(data.error || 'Failed to load sales');
@@ -1823,7 +1821,6 @@ setInterval(updateShiftTimer, 60000);
     if (reportsToggle && reportsMenu) {
       reportsToggle.addEventListener('click', function (e) {
         e.stopPropagation();
-        console.log('reports clicked');
         reportsMenu.classList.toggle('show');
       });
 

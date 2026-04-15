@@ -318,6 +318,20 @@ input:focus, select:focus{
   .app-actions img.side-logo{height:84px}
   .app-title{font-size:16px}
 }
+
+.table td,
+.table th {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table td:last-child {
+  min-width: 220px;
+}
+
+.badge {
+  display: inline-block;
+}
 /* ===== Clean Button System ===== */
 
 .btn{

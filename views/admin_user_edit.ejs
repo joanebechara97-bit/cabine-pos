@@ -22,11 +22,14 @@
       <p style="color:#b91c1c; font-weight:800;"><%= error %></p>
     <% } %>
 
-    <form method="POST" action="/admin/users/<%= userRecord.id %>">
+    <% const p = (form && form.perms) || {}; %>
+    <% const selectedRole = (form && form.role) || 'FRONT_DESK'; %>
+
+    <form method="POST" action="/admin/users/<%= userRecord.id %>/edit">
       <div style="display:grid; gap:14px; max-width:720px;">
         <label>
           <div style="font-weight:800; margin-bottom:6px;">Username</div>
-          <input name="username" value="<%= (form && form.username) || '' %>" required />
+          <input name="username" value="<%= (form && form.email) || '' %>" required />
         </label>
 
         <label>
@@ -38,8 +41,8 @@
         <label>
           <div style="font-weight:800; margin-bottom:6px;">Role</div>
           <select name="role" id="roleSelect">
-            <option value="FRONT_DESK" <%= (form && form.role) === 'FRONT_DESK' ? 'selected' : '' %>>FRONT_DESK</option>
-            <option value="ADMIN" <%= (form && form.role) === 'ADMIN' ? 'selected' : '' %>>ADMIN</option>
+            <option value="FRONT_DESK" <%= selectedRole === 'FRONT_DESK' ? 'selected' : '' %>>FRONT_DESK</option>
+            <option value="ADMIN" <%= selectedRole === 'ADMIN' ? 'selected' : '' %>>ADMIN</option>
           </select>
         </label>
 
@@ -48,10 +51,8 @@
           <span>Active</span>
         </label>
 
-        <% const p = (form && form.perms) || {}; %>
-
         <div id="permsBox" class="permissions-card">
-          <div class="permissions-title">Permissions (FRONT_DESK)</div>
+          <div class="permissions-title">Permissions (<%= selectedRole %>)</div>
 
           <div class="permissions-grid">
             <% Object.keys(permissionLabels || {}).forEach(function(key) { %>

@@ -10,7 +10,6 @@ async function main() {
     WHERE voidedBy IS NOT NULL
   `);
 
-  console.log("Rows with voidedBy:");
   console.table(rows);
 
 }

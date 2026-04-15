@@ -7,7 +7,6 @@ async function main() {
     await prisma.$executeRawUnsafe(`ALTER TABLE "Order" ADD COLUMN voidedById INTEGER;`);
     console.log("Added column voidedById");
   } catch (e) {
-    console.log("voidedById may already exist, continuing...");
   }
 
   // 2) Copy old voidedBy into voidedById
@@ -16,8 +15,6 @@ async function main() {
     SET voidedById = CAST(voidedBy AS INTEGER)
     WHERE voidedBy IS NOT NULL AND voidedById IS NULL;
   `);
-
-  console.log("Copied voidedBy -> voidedById. Rows updated:", updated);
 
   // 3) Show proof
   const rows = await prisma.$queryRawUnsafe(`

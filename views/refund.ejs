@@ -29,7 +29,12 @@
     <form method="GET" action="/refund" style="display:flex; gap:10px; align-items:end; flex-wrap:wrap;">
       <div style="max-width:260px;">
         <label style="font-weight:900; display:block; margin-bottom:6px;">Invoice Number</label>
-        <input name="invoice" placeholder="e.g. 120" value="<%= inv %>" />
+<input
+  type="number"
+  name="invoice"
+  placeholder="e.g. 120"
+  value="%= typeof inv === 'string' ? inv : '' %>"
+/>
       </div>
 
       <button class="btn primary" type="submit">Search</button>
@@ -45,10 +50,16 @@
         </div>
 
         <div style="margin-top:10px;">
-          <div><b>Invoice #:</b> <%= found.invoiceNumber %></div>
+          <div>Invoice #: <%= found.invoiceNumber != null ? found.invoiceNumber : '-' %></div>
           <div><b>Confirmed At:</b> <%= found.confirmedAt ? new Date(found.confirmedAt).toLocaleString('en-GB') : '-' %></div>
-          <div><b>Total:</b> $<%= Number(found.total || 0).toFixed(2) %></div>
-        </div>
+<% const displayTotal =
+  found.total != null ? Number(found.total) :
+  found.totalCents != null ? Number(found.totalCents) / 100 :
+  found.finalTotalCents != null ? Number(found.finalTotalCents) / 100 :
+  0;
+%>
+
+<div>Total: $<%= displayTotal.toFixed(2) %></div>        </div>
 
         <% if (found.status !== 'CONFIRMED') { %>
           <div class="muted" style="margin-top:10px; font-weight:800;">

@@ -42,7 +42,6 @@ async function main() {
     data: { businessId: business.id },
   });
 
-  console.log('✅ Backfill complete. Business ID:', business.id);
 }
 
 main()
